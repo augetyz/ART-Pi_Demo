@@ -69,7 +69,7 @@
 */
 
 #pragma once
-#define CY_USING_HAL
+
 #if defined(CY_USING_HAL)
 #include "cyhal_general_types.h"
 #include "cyhal_hw_types.h"

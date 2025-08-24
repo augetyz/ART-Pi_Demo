@@ -7,6 +7,9 @@ set(MX_Defines_Syms
 	USE_PWR_LDO_SUPPLY 
 	USE_HAL_DRIVER 
 	STM32H750xx
+	CY_USING_HAL
+	ENABLE_CONNECTIVITY_MIDDLEWARE_LOGS
+	CYBSP_WIFI_CAPABLE
     $<$<CONFIG:Debug>:DEBUG>
 )
 
@@ -425,6 +428,8 @@ set(Connectivity_Src
 	${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/aws-iot-device-sdk-port/source/cy_aws_clock.c
 	${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/aws-iot-device-sdk-port/source/cy_aws_retry_utils.c
 	${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/aws-iot-device-sdk-port/source/COMPONENT_SECURE_SOCKETS/cy_aws_tcpip_port_secure_sockets.c
+	${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/wifi-host-driver/COMPONENT_WIFI5/resources/firmware/COMPONENT_43438/43438A1_bin.c
+	${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/wifi-host-driver/COMPONENT_WIFI5/resources/clm/COMPONENT_43438/43438A1_clm_blob.c
 )
 set(Middleware_Src
     ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_RTOS_Middleware/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.c
@@ -441,8 +446,7 @@ set(Middleware_Src
 
 # Link directories setup
 set(MX_LINK_DIRS
-
-    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/btstack/stack/COMPONENT_WICED_BLE/COMPONENT_CM7/COMPONENT_SOFTFP/TOOLCHAIN_GCC_ARM
+    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/btstack/stack/COMPONENT_WICED_BLE/COMPONENT_CM7/COMPONENT_HARDFP/TOOLCHAIN_GCC_ARM
 )
 # Project static libraries
 set(MX_LINK_LIBS  
@@ -453,6 +457,8 @@ set(MX_LINK_LIBS
 	Middleware
 	
 )
+
+
 # Interface library for includes and symbols
 add_library(stm32cubemx INTERFACE)
 target_include_directories(stm32cubemx INTERFACE ${MX_Include_Dirs})

@@ -8,7 +8,7 @@
   ******************************************************************************
    * @attention
   *
-  * Copyright (c) 2025 STMicroelectronics.
+  * Copyright (c) 2022 STMicroelectronics.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -26,27 +26,31 @@
  extern "C" {
 #endif
 
-/* Includes ------------------------------------------------------------------*/
-#include "mbedtls_config.h"
-/* USER CODE BEGIN 0 */
+     /* Includes ------------------------------------------------------------------*/
+#include "mbedtls/config.h"
+#include "mbedtls/ssl.h"
+#include "mbedtls/entropy.h"
+#include "mbedtls/ctr_drbg.h"
+#include "mbedtls/debug.h"
+     /* USER CODE BEGIN 0 */
 
-/* USER CODE END 0 */
+     /* USER CODE END 0 */
 
-/* Global variables ---------------------------------------------------------*/
+     /* Global variables ---------------------------------------------------------*/
 
-/* USER CODE BEGIN 1 */
+     /* USER CODE BEGIN 1 */
 
-/* USER CODE END 1 */
+     /* USER CODE END 1 */
 
-/* MBEDTLS init function */
-void MX_MBEDTLS_Init(void);
+     /* MBEDTLS init function */
+     void MX_MBEDTLS_Init(void);
 
-/* USER CODE BEGIN 2 */
+     /* USER CODE BEGIN 2 */
 
-/* USER CODE END 2 */
+     /* USER CODE END 2 */
 
 #ifdef __cplusplus
-}
+ }
 #endif
 #endif /*__mbedtls_H */
 

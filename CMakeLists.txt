@@ -44,16 +44,19 @@ add_subdirectory(cmake/stm32cubemx)
 target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined library search paths
 )
-
+target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
+#        CY_USING_HAL
+)
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
+    App/Task_Wifi.c
 )
 
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
-
+    App
 )
 
 # Add project symbols (macros)
