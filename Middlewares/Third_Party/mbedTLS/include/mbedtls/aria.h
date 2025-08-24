@@ -9,8 +9,7 @@
  *        Korean, but see http://210.104.33.10/ARIA/index-e.html in English)
  *        and also described by the IETF in <em>RFC 5794</em>.
  */
-/*
- *  Copyright The Mbed TLS Contributors
+/*  Copyright (C) 2006-2018, ARM Limited, All Rights Reserved
  *  SPDX-License-Identifier: Apache-2.0
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -24,13 +23,15 @@
  *  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
+ *
+ *  This file is part of mbed TLS (https://tls.mbed.org)
  */
 
 #ifndef MBEDTLS_ARIA_H
 #define MBEDTLS_ARIA_H
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
+#include "config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
@@ -38,7 +39,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "mbedtls/platform_util.h"
+#include "platform_util.h"
 
 #define MBEDTLS_ARIA_ENCRYPT     1 /**< ARIA encryption. */
 #define MBEDTLS_ARIA_DECRYPT     0 /**< ARIA decryption. */

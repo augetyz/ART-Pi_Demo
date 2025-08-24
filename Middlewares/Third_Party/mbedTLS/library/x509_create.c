@@ -1,7 +1,7 @@
 /*
  *  X.509 base functions for creating certificates / CSRs
  *
- *  Copyright The Mbed TLS Contributors
+ *  Copyright (C) 2006-2015, ARM Limited, All Rights Reserved
  *  SPDX-License-Identifier: Apache-2.0
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -15,15 +15,20 @@
  *  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
+ *
+ *  This file is part of mbed TLS (https://tls.mbed.org)
  */
 
-#include "common.h"
+#if !defined(MBEDTLS_CONFIG_FILE)
+#include "mbedtls/config.h"
+#else
+#include MBEDTLS_CONFIG_FILE
+#endif
 
 #if defined(MBEDTLS_X509_CREATE_C)
 
 #include "mbedtls/x509.h"
 #include "mbedtls/asn1write.h"
-#include "mbedtls/error.h"
 #include "mbedtls/oid.h"
 
 #include <string.h>
@@ -236,7 +241,7 @@ int mbedtls_x509_set_extension( mbedtls_asn1_named_data **head, const char *oid,
  */
 static int x509_write_name( unsigned char **p, unsigned char *start, mbedtls_asn1_named_data* cur_name)
 {
-    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
+    int ret;
     size_t len = 0;
     const char *oid             = (const char*)cur_name->oid.p;
     size_t oid_len              = cur_name->oid.len;
@@ -269,7 +274,7 @@ static int x509_write_name( unsigned char **p, unsigned char *start, mbedtls_asn
 int mbedtls_x509_write_names( unsigned char **p, unsigned char *start,
                               mbedtls_asn1_named_data *first )
 {
-    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
+    int ret;
     size_t len = 0;
     mbedtls_asn1_named_data *cur = first;
 
@@ -290,7 +295,7 @@ int mbedtls_x509_write_sig( unsigned char **p, unsigned char *start,
                     const char *oid, size_t oid_len,
                     unsigned char *sig, size_t size )
 {
-    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
+    int ret;
     size_t len = 0;
 
     if( *p < start || (size_t)( *p - start ) < size )
@@ -320,7 +325,7 @@ int mbedtls_x509_write_sig( unsigned char **p, unsigned char *start,
 static int x509_write_extension( unsigned char **p, unsigned char *start,
                                  mbedtls_asn1_named_data *ext )
 {
-    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
+    int ret;
     size_t len = 0;
 
     MBEDTLS_ASN1_CHK_ADD( len, mbedtls_asn1_write_raw_buffer( p, start, ext->val.p + 1,
@@ -358,7 +363,7 @@ static int x509_write_extension( unsigned char **p, unsigned char *start,
 int mbedtls_x509_write_extensions( unsigned char **p, unsigned char *start,
                            mbedtls_asn1_named_data *first )
 {
-    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
+    int ret;
     size_t len = 0;
     mbedtls_asn1_named_data *cur_ext = first;
 

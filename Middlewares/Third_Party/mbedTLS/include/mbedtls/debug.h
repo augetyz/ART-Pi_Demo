@@ -4,7 +4,7 @@
  * \brief Functions for controlling and providing debug output from the library.
  */
 /*
- *  Copyright The Mbed TLS Contributors
+ *  Copyright (C) 2006-2015, ARM Limited, All Rights Reserved
  *  SPDX-License-Identifier: Apache-2.0
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -18,20 +18,22 @@
  *  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
+ *
+ *  This file is part of mbed TLS (https://tls.mbed.org)
  */
 #ifndef MBEDTLS_DEBUG_H
 #define MBEDTLS_DEBUG_H
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
+#include "config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
 
-#include "mbedtls/ssl.h"
+#include "ssl.h"
 
 #if defined(MBEDTLS_ECP_C)
-#include "mbedtls/ecp.h"
+#include "ecp.h"
 #endif
 
 #if defined(MBEDTLS_DEBUG_C)
@@ -260,3 +262,4 @@ void mbedtls_debug_printf_ecdh( const mbedtls_ssl_context *ssl, int level,
 #endif
 
 #endif /* debug.h */
+

@@ -20,6 +20,7 @@
 #include "main.h"
 #include "mbedtls.h"
 #include "memorymap.h"
+#include "rng.h"
 #include "sdmmc.h"
 #include "usart.h"
 #include "gpio.h"
@@ -98,6 +99,7 @@ int main(void)
   MX_UART4_Init();
   MX_USART3_UART_Init();
   MX_MBEDTLS_Init();
+  MX_RNG_Init();
   /* Call PreOsInit function */
   MX_MBEDTLS_Init();
   /* USER CODE BEGIN 2 */
@@ -137,8 +139,9 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48|RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 5;

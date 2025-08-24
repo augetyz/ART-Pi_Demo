@@ -30,12 +30,35 @@
 #include "stm32h7xx_hal.h"
 #include "mbedtls/entropy_poll.h"
 
-int mbedtls_hardware_poll( void *Data, unsigned char *Output, size_t Len, size_t *oLen )
+extern RNG_HandleTypeDef hrng;  // 在 main.c / MX_RNG_Init() 里初始化过
+
+int mbedtls_hardware_poll( void *Data,
+                           unsigned char *Output,
+                           size_t Len,
+                           size_t *oLen )
 {
-/* USER CODE BEGIN custom_rng */
-  #error "please complete this function mbedtls_hardware_poll with your own code";
-  return -1;
-/* USER CODE END custom_rng */
+  size_t count = 0;
+  uint32_t random_val;
+
+  (void) Data;  // 未使用参数，避免警告
+
+  while (count < Len)
+  {
+    if (HAL_RNG_GenerateRandomNumber(&hrng, &random_val) == HAL_OK)
+    {
+      size_t copy_len = (Len - count) < sizeof(random_val) ? (Len - count) : sizeof(random_val);
+      memcpy(Output + count, &random_val, copy_len);
+      count += copy_len;
+    }
+    else
+    {
+      return -1;  // RNG 出错
+    }
+  }
+
+  *oLen = count;
+  return 0; // 成功
 }
+
 
 #endif /*MBEDTLS_ENTROPY_HARDWARE_ALT*/

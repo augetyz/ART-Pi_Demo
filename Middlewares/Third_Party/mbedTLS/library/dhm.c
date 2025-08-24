@@ -1,7 +1,7 @@
 /*
  *  Diffie-Hellman-Merkle key exchange
  *
- *  Copyright The Mbed TLS Contributors
+ *  Copyright (C) 2006-2015, ARM Limited, All Rights Reserved
  *  SPDX-License-Identifier: Apache-2.0
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -15,6 +15,8 @@
  *  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
+ *
+ *  This file is part of mbed TLS (https://tls.mbed.org)
  */
 /*
  *  The following sources were referenced in the design of this implementation
@@ -25,13 +27,16 @@
  *
  */
 
-#include "common.h"
+#if !defined(MBEDTLS_CONFIG_FILE)
+#include "mbedtls/config.h"
+#else
+#include MBEDTLS_CONFIG_FILE
+#endif
 
 #if defined(MBEDTLS_DHM_C)
 
 #include "mbedtls/dhm.h"
 #include "mbedtls/platform_util.h"
-#include "mbedtls/error.h"
 
 #include <string.h>
 
@@ -132,7 +137,7 @@ int mbedtls_dhm_read_params( mbedtls_dhm_context *ctx,
                      unsigned char **p,
                      const unsigned char *end )
 {
-    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
+    int ret;
     DHM_VALIDATE_RET( ctx != NULL );
     DHM_VALIDATE_RET( p != NULL && *p != NULL );
     DHM_VALIDATE_RET( end != NULL );
@@ -234,7 +239,7 @@ int mbedtls_dhm_set_group( mbedtls_dhm_context *ctx,
                            const mbedtls_mpi *P,
                            const mbedtls_mpi *G )
 {
-    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
+    int ret;
     DHM_VALIDATE_RET( ctx != NULL );
     DHM_VALIDATE_RET( P != NULL );
     DHM_VALIDATE_RET( G != NULL );
@@ -255,7 +260,7 @@ int mbedtls_dhm_set_group( mbedtls_dhm_context *ctx,
 int mbedtls_dhm_read_public( mbedtls_dhm_context *ctx,
                      const unsigned char *input, size_t ilen )
 {
-    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
+    int ret;
     DHM_VALIDATE_RET( ctx != NULL );
     DHM_VALIDATE_RET( input != NULL );
 
@@ -319,32 +324,6 @@ cleanup:
 }
 
 /*
- * Pick a random R in the range [2, M) for blinding purposes
- */
-static int dhm_random_below( mbedtls_mpi *R, const mbedtls_mpi *M,
-                int (*f_rng)(void *, unsigned char *, size_t), void *p_rng )
-{
-    int ret, count;
-
-    count = 0;
-    do
-    {
-        MBEDTLS_MPI_CHK( mbedtls_mpi_fill_random( R, mbedtls_mpi_size( M ), f_rng, p_rng ) );
-
-        while( mbedtls_mpi_cmp_mpi( R, M ) >= 0 )
-            MBEDTLS_MPI_CHK( mbedtls_mpi_shift_r( R, 1 ) );
-
-        if( count++ > 10 )
-            return( MBEDTLS_ERR_MPI_NOT_ACCEPTABLE );
-    }
-    while( mbedtls_mpi_cmp_int( R, 1 ) <= 0 );
-
-cleanup:
-    return( ret );
-}
-
-
-/*
  * Use the blinding method and optimisation suggested in section 10 of:
  *  KOCHER, Paul C. Timing attacks on implementations of Diffie-Hellman, RSA,
  *  DSS, and other systems. In : Advances in Cryptology-CRYPTO'96. Springer
@@ -353,10 +332,7 @@ cleanup:
 static int dhm_update_blinding( mbedtls_dhm_context *ctx,
                     int (*f_rng)(void *, unsigned char *, size_t), void *p_rng )
 {
-    int ret;
-    mbedtls_mpi R;
-
-    mbedtls_mpi_init( &R );
+    int ret, count;
 
     /*
      * Don't use any blinding the first time a particular X is used,
@@ -391,23 +367,24 @@ static int dhm_update_blinding( mbedtls_dhm_context *ctx,
      */
 
     /* Vi = random( 2, P-1 ) */
-    MBEDTLS_MPI_CHK( dhm_random_below( &ctx->Vi, &ctx->P, f_rng, p_rng ) );
+    count = 0;
+    do
+    {
+        MBEDTLS_MPI_CHK( mbedtls_mpi_fill_random( &ctx->Vi, mbedtls_mpi_size( &ctx->P ), f_rng, p_rng ) );
 
-    /* Vf = Vi^-X mod P
-     * First compute Vi^-1 = R * (R Vi)^-1, (avoiding leaks from inv_mod),
-     * then elevate to the Xth power. */
-    MBEDTLS_MPI_CHK( dhm_random_below( &R, &ctx->P, f_rng, p_rng ) );
-    MBEDTLS_MPI_CHK( mbedtls_mpi_mul_mpi( &ctx->Vf, &ctx->Vi, &R ) );
-    MBEDTLS_MPI_CHK( mbedtls_mpi_mod_mpi( &ctx->Vf, &ctx->Vf, &ctx->P ) );
-    MBEDTLS_MPI_CHK( mbedtls_mpi_inv_mod( &ctx->Vf, &ctx->Vf, &ctx->P ) );
-    MBEDTLS_MPI_CHK( mbedtls_mpi_mul_mpi( &ctx->Vf, &ctx->Vf, &R ) );
-    MBEDTLS_MPI_CHK( mbedtls_mpi_mod_mpi( &ctx->Vf, &ctx->Vf, &ctx->P ) );
+        while( mbedtls_mpi_cmp_mpi( &ctx->Vi, &ctx->P ) >= 0 )
+            MBEDTLS_MPI_CHK( mbedtls_mpi_shift_r( &ctx->Vi, 1 ) );
 
+        if( count++ > 10 )
+            return( MBEDTLS_ERR_MPI_NOT_ACCEPTABLE );
+    }
+    while( mbedtls_mpi_cmp_int( &ctx->Vi, 1 ) <= 0 );
+
+    /* Vf = Vi^-X mod P */
+    MBEDTLS_MPI_CHK( mbedtls_mpi_inv_mod( &ctx->Vf, &ctx->Vi, &ctx->P ) );
     MBEDTLS_MPI_CHK( mbedtls_mpi_exp_mod( &ctx->Vf, &ctx->Vf, &ctx->X, &ctx->P, &ctx->RP ) );
 
 cleanup:
-    mbedtls_mpi_free( &R );
-
     return( ret );
 }
 
@@ -419,7 +396,7 @@ int mbedtls_dhm_calc_secret( mbedtls_dhm_context *ctx,
                      int (*f_rng)(void *, unsigned char *, size_t),
                      void *p_rng )
 {
-    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
+    int ret;
     mbedtls_mpi GYb;
     DHM_VALIDATE_RET( ctx != NULL );
     DHM_VALIDATE_RET( output != NULL );
@@ -496,7 +473,7 @@ void mbedtls_dhm_free( mbedtls_dhm_context *ctx )
 int mbedtls_dhm_parse_dhm( mbedtls_dhm_context *dhm, const unsigned char *dhmin,
                    size_t dhminlen )
 {
-    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
+    int ret;
     size_t len;
     unsigned char *p, *end;
 #if defined(MBEDTLS_PEM_PARSE_C)
@@ -650,7 +627,7 @@ static int load_file( const char *path, unsigned char **buf, size_t *n )
  */
 int mbedtls_dhm_parse_dhmfile( mbedtls_dhm_context *dhm, const char *path )
 {
-    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
+    int ret;
     size_t n;
     unsigned char *buf;
     DHM_VALIDATE_RET( dhm != NULL );
@@ -702,7 +679,7 @@ static const size_t mbedtls_test_dhm_params_len = sizeof( mbedtls_test_dhm_param
  */
 int mbedtls_dhm_self_test( int verbose )
 {
-    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
+    int ret;
     mbedtls_dhm_context dhm;
 
     mbedtls_dhm_init( &dhm );

@@ -4,7 +4,7 @@
  * \brief PKCS#12 Personal Information Exchange Syntax
  */
 /*
- *  Copyright The Mbed TLS Contributors
+ *  Copyright (C) 2006-2015, ARM Limited, All Rights Reserved
  *  SPDX-License-Identifier: Apache-2.0
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -18,19 +18,21 @@
  *  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
+ *
+ *  This file is part of mbed TLS (https://tls.mbed.org)
  */
 #ifndef MBEDTLS_PKCS12_H
 #define MBEDTLS_PKCS12_H
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
+#include "config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
 
-#include "mbedtls/md.h"
-#include "mbedtls/cipher.h"
-#include "mbedtls/asn1.h"
+#include "md.h"
+#include "cipher.h"
+#include "asn1.h"
 
 #include <stddef.h>
 

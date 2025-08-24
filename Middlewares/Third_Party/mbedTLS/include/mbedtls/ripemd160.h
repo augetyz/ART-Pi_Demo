@@ -4,7 +4,7 @@
  * \brief RIPE MD-160 message digest
  */
 /*
- *  Copyright The Mbed TLS Contributors
+ *  Copyright (C) 2006-2015, ARM Limited, All Rights Reserved
  *  SPDX-License-Identifier: Apache-2.0
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -18,12 +18,14 @@
  *  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
+ *
+ *  This file is part of mbed TLS (https://tls.mbed.org)
  */
 #ifndef MBEDTLS_RIPEMD160_H
 #define MBEDTLS_RIPEMD160_H
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
+#include "config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
@@ -55,7 +57,7 @@ typedef struct mbedtls_ripemd160_context
 mbedtls_ripemd160_context;
 
 #else  /* MBEDTLS_RIPEMD160_ALT */
-#include "ripemd160_alt.h"
+#include "ripemd160.h"
 #endif /* MBEDTLS_RIPEMD160_ALT */
 
 /**

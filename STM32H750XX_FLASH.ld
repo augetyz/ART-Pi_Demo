@@ -61,12 +61,12 @@ _Min_Stack_Size = 0x2000; /* required amount of stack */
 /* Specify the memory areas */
 MEMORY
 {
-DTCMRAM (xrw)      : ORIGIN = 0x20000000, LENGTH = 128K
-RAM (xrw)      : ORIGIN = 0x24000000, LENGTH = 512K
-RAM_D2 (xrw)      : ORIGIN = 0x30000000, LENGTH = 288K
-RAM_D3 (xrw)      : ORIGIN = 0x38000000, LENGTH = 64K
-ITCMRAM (xrw)      : ORIGIN = 0x00000000, LENGTH = 64K
-FLASH (rx)      : ORIGIN = 0x8000000, LENGTH = 128K
+    RAM (xrw)      : ORIGIN = 0x24000000, LENGTH = 512K
+    DTCMRAM (xrw)      : ORIGIN = 0x20000000, LENGTH = 128K
+    RAM_D2 (xrw)      : ORIGIN = 0x30000000, LENGTH = 288K
+    RAM_D3 (xrw)      : ORIGIN = 0x38000000, LENGTH = 64K
+    ITCMRAM (xrw)      : ORIGIN = 0x00000000, LENGTH = 64K
+    FLASH (rx)      : ORIGIN = 0x8000000, LENGTH = 128K
 }
 
 /* Define output sections */
@@ -106,14 +106,14 @@ SECTIONS
     . = ALIGN(4);
   } >FLASH
 
-  .ARM.extab (READONLY) : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
+  .ARM.extab  : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
   {
     . = ALIGN(4);
     *(.ARM.extab* .gnu.linkonce.armextab.*)
     . = ALIGN(4);
   } >FLASH
 
-  .ARM (READONLY) : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
+  .ARM  : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
   {
     . = ALIGN(4);
     __exidx_start = .;
@@ -122,7 +122,7 @@ SECTIONS
     . = ALIGN(4);
   } >FLASH
 
-  .preinit_array (READONLY) : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
+  .preinit_array  : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
   {
     . = ALIGN(4);
     PROVIDE_HIDDEN (__preinit_array_start = .);
@@ -131,7 +131,7 @@ SECTIONS
     . = ALIGN(4);
   } >FLASH
 
-  .init_array (READONLY) : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
+  .init_array  : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
   {
     . = ALIGN(4);
     PROVIDE_HIDDEN (__init_array_start = .);
@@ -141,7 +141,7 @@ SECTIONS
     . = ALIGN(4);
   } >FLASH
 
-  .fini_array (READONLY) : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
+  .fini_array  : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
   {
     . = ALIGN(4);
     PROVIDE_HIDDEN (__fini_array_start = .);
@@ -166,7 +166,7 @@ SECTIONS
 
     . = ALIGN(4);
     _edata = .;        /* define a global symbol at data end */
-  } >DTCMRAM AT> FLASH
+  } >RAM AT> FLASH
 
 
   /* Uninitialized data section */
@@ -183,7 +183,7 @@ SECTIONS
     . = ALIGN(4);
     _ebss = .;         /* define a global symbol at bss end */
     __bss_end__ = _ebss;
-  } >DTCMRAM
+  } >RAM
 
   /* User_heap_stack section, used to check that there is enough RAM left */
   ._user_heap_stack :
@@ -194,7 +194,7 @@ SECTIONS
     . = . + _Min_Heap_Size;
     . = . + _Min_Stack_Size;
     . = ALIGN(8);
-  } >DTCMRAM
+  } >RAM
 
 
 

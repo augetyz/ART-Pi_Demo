@@ -1,7 +1,7 @@
 /*
  *  X.509 Certidicate Revocation List (CRL) parsing
  *
- *  Copyright The Mbed TLS Contributors
+ *  Copyright (C) 2006-2015, ARM Limited, All Rights Reserved
  *  SPDX-License-Identifier: Apache-2.0
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -15,6 +15,8 @@
  *  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
+ *
+ *  This file is part of mbed TLS (https://tls.mbed.org)
  */
 /*
  *  The ITU-T X.509 standard defines a certificate format for PKI.
@@ -27,12 +29,15 @@
  *  http://www.itu.int/ITU-T/studygroups/com17/languages/X.690-0207.pdf
  */
 
-#include "common.h"
+#if !defined(MBEDTLS_CONFIG_FILE)
+#include "mbedtls/config.h"
+#else
+#include MBEDTLS_CONFIG_FILE
+#endif
 
 #if defined(MBEDTLS_X509_CRL_PARSE_C)
 
 #include "mbedtls/x509_crl.h"
-#include "mbedtls/error.h"
 #include "mbedtls/oid.h"
 #include "mbedtls/platform_util.h"
 
@@ -69,7 +74,7 @@ static int x509_crl_get_version( unsigned char **p,
                              const unsigned char *end,
                              int *ver )
 {
-    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
+    int ret;
 
     if( ( ret = mbedtls_asn1_get_int( p, end, ver ) ) != 0 )
     {
@@ -96,7 +101,7 @@ static int x509_get_crl_ext( unsigned char **p,
                              const unsigned char *end,
                              mbedtls_x509_buf *ext )
 {
-    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
+    int ret;
 
     if( *p == end )
         return( 0 );
@@ -176,7 +181,7 @@ static int x509_get_crl_entry_ext( unsigned char **p,
                              const unsigned char *end,
                              mbedtls_x509_buf *ext )
 {
-    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
+    int ret;
     size_t len = 0;
 
     /* OPTIONAL */
@@ -230,7 +235,7 @@ static int x509_get_entries( unsigned char **p,
                              const unsigned char *end,
                              mbedtls_x509_crl_entry *entry )
 {
-    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
+    int ret;
     size_t entry_len;
     mbedtls_x509_crl_entry *cur_entry = entry;
 
@@ -253,13 +258,13 @@ static int x509_get_entries( unsigned char **p,
         size_t len2;
         const unsigned char *end2;
 
-        cur_entry->raw.tag = **p;
         if( ( ret = mbedtls_asn1_get_tag( p, end, &len2,
                 MBEDTLS_ASN1_SEQUENCE | MBEDTLS_ASN1_CONSTRUCTED ) ) != 0 )
         {
             return( ret );
         }
 
+        cur_entry->raw.tag = **p;
         cur_entry->raw.p = *p;
         cur_entry->raw.len = len2;
         end2 = *p + len2;
@@ -295,7 +300,7 @@ static int x509_get_entries( unsigned char **p,
 int mbedtls_x509_crl_parse_der( mbedtls_x509_crl *chain,
                         const unsigned char *buf, size_t buflen )
 {
-    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
+    int ret;
     size_t len;
     unsigned char *p = NULL, *end = NULL;
     mbedtls_x509_buf sig_params1, sig_params2, sig_oid2;
@@ -534,8 +539,8 @@ int mbedtls_x509_crl_parse_der( mbedtls_x509_crl *chain,
 int mbedtls_x509_crl_parse( mbedtls_x509_crl *chain, const unsigned char *buf, size_t buflen )
 {
 #if defined(MBEDTLS_PEM_PARSE_C)
-    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
-    size_t use_len = 0;
+    int ret;
+    size_t use_len;
     mbedtls_pem_context pem;
     int is_pem = 0;
 
@@ -598,7 +603,7 @@ int mbedtls_x509_crl_parse( mbedtls_x509_crl *chain, const unsigned char *buf, s
  */
 int mbedtls_x509_crl_parse_file( mbedtls_x509_crl *chain, const char *path )
 {
-    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
+    int ret;
     size_t n;
     unsigned char *buf;
 
@@ -625,7 +630,7 @@ int mbedtls_x509_crl_parse_file( mbedtls_x509_crl *chain, const char *path )
 int mbedtls_x509_crl_info( char *buf, size_t size, const char *prefix,
                    const mbedtls_x509_crl *crl )
 {
-    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
+    int ret;
     size_t n;
     char *p;
     const mbedtls_x509_crl_entry *entry;
