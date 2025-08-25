@@ -118,7 +118,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  // MX_SDMMC2_MMC_Init();
+  MX_SDMMC2_MMC_Init();
   MX_UART4_Init();
   MX_USART3_UART_Init();
   // MX_MBEDTLS_Init();
