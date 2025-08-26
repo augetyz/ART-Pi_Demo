@@ -30,14 +30,6 @@ SECTIONS
         . = ALIGN(4);
     } >QSPI
 
-    /* 放到片内 Flash 的代码区 */
-    .flash_embed :
-    {
-        . = ALIGN(4);
-        *(.FastFlash*)            /* 收集所有带 .FastFlash 的函数/变量 */
-        . = ALIGN(4);
-    } >FLASH
-
     /* The program code and other data goes into FLASH */
     .text :
     {
@@ -54,6 +46,14 @@ SECTIONS
         . = ALIGN(4);
         _etext = .;        /* define a global symbols at end of code */
     } >QSPI
+
+    /* 放到片内 Flash 的代码区 */
+    .flash_embed :
+    {
+        . = ALIGN(4);
+        *(.FastFlash*)            /* 收集所有带 .FastFlash 的函数/变量 */
+        . = ALIGN(4);
+    } >FLASH
 
     /* 放到片外 QSPI Flash 的代码区 */
     .flash_external :

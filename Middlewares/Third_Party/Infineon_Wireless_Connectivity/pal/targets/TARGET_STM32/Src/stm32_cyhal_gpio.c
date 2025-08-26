@@ -709,7 +709,7 @@ static void _stm32_cyhal_gpio_enable_irq(uint32_t pin_number, uint32_t priority,
         #if defined(CYHAL_GPIO_USE_HAL_IRQ_PRIOPITY)
         HAL_NVIC_SetPriority(IRQn, priority, 0);
         #endif /* defined(CYHAL_GPIO_USE_HAL_IRQ_PRIOPITY) */
-
+        HAL_NVIC_SetPriority(IRQn, 5, 0);
         HAL_NVIC_EnableIRQ(IRQn);
     }
     else

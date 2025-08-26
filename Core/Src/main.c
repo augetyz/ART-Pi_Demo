@@ -85,7 +85,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-  // SCB->VTOR = 0x90000000;
+  SCB->VTOR = 0x90000000;
   /* USER CODE END 1 */
 
   /* MPU Configuration--------------------------------------------------------*/
