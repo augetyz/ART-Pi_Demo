@@ -74,7 +74,6 @@ void WiFiTask(void *argument);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-extern size_t get_free_heap_size(void);
 
 /* USER CODE END 0 */
 
@@ -86,7 +85,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-  SCB->VTOR = 0x90000000;
+  // SCB->VTOR = 0x90000000;
   /* USER CODE END 1 */
 
   /* MPU Configuration--------------------------------------------------------*/
@@ -121,15 +120,12 @@ int main(void)
   MX_SDMMC2_MMC_Init();
   MX_UART4_Init();
   MX_USART3_UART_Init();
-  // MX_MBEDTLS_Init();
   MX_RNG_Init();
   /* Call PreOsInit function */
-  // MX_MBEDTLS_Init();
   /* USER CODE BEGIN 2 */
   LED_R_GPIO_Port->ODR |= LED_R_Pin;
   LED_B_GPIO_Port->ODR |= LED_B_Pin;
   printf("Hello World!\n");
-  printf("free_heap_size:0x%X\n",get_free_heap_size());
 
   /* Init scheduler */
   osKernelInitialize();
@@ -143,8 +139,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    HAL_Delay(100);
-    LED_R_GPIO_Port->ODR ^= LED_R_Pin;
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

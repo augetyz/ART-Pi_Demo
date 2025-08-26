@@ -1,53 +1,3 @@
-/*
-******************************************************************************
-**
-**  File        : LinkerScript.ld
-**
-**  Author      : STM32CubeMX
-**
-**  Abstract    : Linker script for STM32H750XBHx series
-**                128Kbytes FLASH and 1056Kbytes RAM
-**
-**                Set heap size, stack size and stack location according
-**                to application requirements.
-**
-**                Set memory bank area and size if external memory is used.
-**
-**  Target      : STMicroelectronics STM32
-**
-**  Distribution: The file is distributed “as is,” without any warranty
-**                of any kind.
-**
-*****************************************************************************
-** @attention
-**
-** <h2><center>&copy; COPYRIGHT(c) 2025 STMicroelectronics</center></h2>
-**
-** Redistribution and use in source and binary forms, with or without modification,
-** are permitted provided that the following conditions are met:
-**   1. Redistributions of source code must retain the above copyright notice,
-**      this list of conditions and the following disclaimer.
-**   2. Redistributions in binary form must reproduce the above copyright notice,
-**      this list of conditions and the following disclaimer in the documentation
-**      and/or other materials provided with the distribution.
-**   3. Neither the name of STMicroelectronics nor the names of its contributors
-**      may be used to endorse or promote products derived from this software
-**      without specific prior written permission.
-**
-** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-** AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-** IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-** DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-** FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-** DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-** SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-** CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-** OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-**
-*****************************************************************************
-*/
-
 /* Entry Point */
 ENTRY(Reset_Handler)
 
@@ -55,16 +5,16 @@ ENTRY(Reset_Handler)
 _estack          = ORIGIN(DTCMRAM) + LENGTH(DTCMRAM);    /* end of RAM */
 /* Generate a link error if heap and stack don't fit into RAM */
 _Min_Heap_Size   = 0x60000;      /* required amount of heap  */
-_Min_Stack_Size  = 0x2000;       /* required amount of stack */
+_Min_Stack_Size  = 0x8000;       /* required amount of stack */
 
 /* Specify the memory areas */
 MEMORY
 {
-    RAM      (xrw) : ORIGIN = 0x24000000, LENGTH = 512K
     DTCMRAM  (xrw) : ORIGIN = 0x20000000, LENGTH = 128K
+    ITCMRAM  (xrw) : ORIGIN = 0x00000000, LENGTH = 64K
+    RAM      (xrw) : ORIGIN = 0x24000000, LENGTH = 512K
     RAM_D2   (xrw) : ORIGIN = 0x30000000, LENGTH = 288K
     RAM_D3   (xrw) : ORIGIN = 0x38000000, LENGTH = 64K
-    ITCMRAM  (xrw) : ORIGIN = 0x00000000, LENGTH = 64K
     FLASH    (rx)  : ORIGIN = 0x8000000,  LENGTH = 128K
     QSPI     (rx)  : ORIGIN = 0x90000000, LENGTH = 8M
 }
@@ -79,6 +29,14 @@ SECTIONS
         KEEP(*(.isr_vector)) /* Startup code */
         . = ALIGN(4);
     } >QSPI
+
+    /* 放到片内 Flash 的代码区 */
+    .flash_embed :
+    {
+        . = ALIGN(4);
+        *(.FastFlash*)            /* 收集所有带 .FastFlash 的函数/变量 */
+        . = ALIGN(4);
+    } >FLASH
 
     /* The program code and other data goes into FLASH */
     .text :
@@ -97,6 +55,13 @@ SECTIONS
         _etext = .;        /* define a global symbols at end of code */
     } >QSPI
 
+    /* 放到片外 QSPI Flash 的代码区 */
+    .flash_external :
+    {
+        . = ALIGN(4);
+        *(.SlowFlash*)            /* 收集所有带 .SlowFlash 的函数/变量 */
+        . = ALIGN(4);
+    } >QSPI
     /* Constant data goes into FLASH */
     .rodata :
     {
@@ -104,18 +69,6 @@ SECTIONS
         *(.rodata)         /* .rodata sections (constants, strings, etc.) */
         *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
         . = ALIGN(4);
-    } >QSPI
-
-    /* 放到片外 QSPI Flash 的代码区 */
-    .extflash :
-    {
-        *(.FastFlash*)            /* 收集所有带 .FastFlash 的函数/变量 */
-    } >FLASH
-
-    /* 放到片外 QSPI Flash 的代码区 */
-    .extflash :
-    {
-        *(.SlowFlash*)            /* 收集所有带 .SlowFlash 的函数/变量 */
     } >QSPI
 
     .ARM.extab  :
@@ -214,7 +167,6 @@ SECTIONS
         . = . + _Min_Stack_Size;
         PROVIDE(_stack_end = .);   /* 栈底 */
     } >RAM
-
 
     /* Remove information from the standard libraries */
     /DISCARD/ :
