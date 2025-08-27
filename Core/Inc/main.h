@@ -75,6 +75,7 @@ void Error_Handler(void);
 /* USER CODE BEGIN Private defines */
 #define FastCode __attribute__((section(".FastFlash")))
 #define SlowCode __attribute__((section(".SlowFlash")))
+#define ExtSRAM __attribute__((section(".ExtSRAM")))
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

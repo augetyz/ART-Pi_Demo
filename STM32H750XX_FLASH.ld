@@ -15,6 +15,7 @@ MEMORY
     RAM      (xrw) : ORIGIN = 0x24000000, LENGTH = 512K
     RAM_D2   (xrw) : ORIGIN = 0x30000000, LENGTH = 288K
     RAM_D3   (xrw) : ORIGIN = 0x38000000, LENGTH = 64K
+    SDRAM    (xrw) : ORIGIN = 0xC0000000, LENGTH = 32M
     FLASH    (rx)  : ORIGIN = 0x8000000,  LENGTH = 128K
     QSPI     (rx)  : ORIGIN = 0x90000000, LENGTH = 8M
 }
@@ -62,6 +63,13 @@ SECTIONS
         *(.SlowFlash*)            /* 收集所有带 .SlowFlash 的函数/变量 */
         . = ALIGN(4);
     } >QSPI
+
+    /* 在SDRAM区域内添加自定义段 */
+    .sdram_data : {
+      . = ALIGN(4);       /* 4字节对齐 */
+      *(.ExtSRAM)      /* 匹配所有标记为.sdram_data的段 */
+      . = ALIGN(4);
+    } > SDRAM             /* 指定段存储到SDRAM区域 */
     /* Constant data goes into FLASH */
     .rodata :
     {
