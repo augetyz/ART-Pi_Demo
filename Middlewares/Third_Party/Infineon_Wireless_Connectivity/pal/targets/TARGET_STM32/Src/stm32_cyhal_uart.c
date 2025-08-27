@@ -1567,6 +1567,7 @@ static void _stm32_cyhal_uart_enable_irq(USART_TypeDef* instance, uint32_t prior
         #if defined(CYHAL_UART_USE_HAL_IRQ_PRIOPITY)
         HAL_NVIC_SetPriority(IRQn, priority, 0);
         #endif /* defined(CYHAL_UART_USE_HAL_IRQ_PRIOPITY) */
+        HAL_NVIC_SetPriority(IRQn, 5, 0);
         HAL_NVIC_EnableIRQ(IRQn);
     }
     else

@@ -26,7 +26,8 @@
 
 UART_HandleTypeDef huart4;
 UART_HandleTypeDef huart3;
-
+DMA_HandleTypeDef hdma_usart3_tx;
+DMA_HandleTypeDef hdma_usart3_rx;
 /* UART4 init function */
 void MX_UART4_Init(void)
 {

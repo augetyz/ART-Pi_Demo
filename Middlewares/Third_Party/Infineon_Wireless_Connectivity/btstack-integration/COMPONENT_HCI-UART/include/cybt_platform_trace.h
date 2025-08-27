@@ -44,7 +44,7 @@
 /*****************************************************************************
  *                                Constants
  ****************************************************************************/
-#define INITIAL_TRACE_LEVEL_MAIN          (CYBT_TRACE_LEVEL_ERROR)
+#define INITIAL_TRACE_LEVEL_MAIN          (CYBT_TRACE_LEVEL_DEBUG)
 #define INITIAL_TRACE_LEVEL_SPIF          (CYBT_TRACE_LEVEL_ERROR)
 #define INITIAL_TRACE_LEVEL_HCITX_TASK    (CYBT_TRACE_LEVEL_ERROR)
 #define INITIAL_TRACE_LEVEL_HCIRX_TASK    (CYBT_TRACE_LEVEL_ERROR)

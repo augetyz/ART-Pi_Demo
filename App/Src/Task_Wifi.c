@@ -28,13 +28,15 @@ typedef struct
 /* Private macro -------------------------------------------------------------*/
 /* Wi-Fi Connection related parameters */
 #if  !defined(WIFI_CONNECT_ENABLE)
-   #define WIFI_CONNECT_ENABLE             (1) /* Enable/Disable Wi-Fi Connect */
+   #define WIFI_CONNECT_ENABLE             (0) /* Enable/Disable Wi-Fi Connect */
 #endif /* (WIFI_CONNECT_ENABLE) */
 #if  !defined(WIFI_SSID)
-   #define WIFI_SSID                       "Sparkle"
+   // #define WIFI_SSID                       "Sparkle"
+   #define WIFI_SSID                       "ZYITC_OFFICE"
 #endif /* (WIFI_SSID) */
 #if  !defined(WIFI_PASSWORD)
-   #define WIFI_PASSWORD                   "123456789"
+   // #define WIFI_PASSWORD                   "123456789"
+   #define WIFI_PASSWORD                   "ZYoffice2024*"
 #endif /* (WIFI_PASSWORD) */
 
 #define WIFI_SECURITY                       CY_WCM_SECURITY_WPA2_AES_PSK
@@ -66,6 +68,7 @@ const char* security_to_str(whd_security_t security);
 void wifi_connect(void);
 
 extern osThreadId_t       WiFi_TaskHandle;
+extern size_t get_free_heap_size(void);
 /* Private user code ---------------------------------------------------------*/
 SD_HandleTypeDef SDHandle = { .Instance = SDMMC2 };
 
@@ -92,15 +95,11 @@ void WiFiTask(void* argument)
     cy_wcm_config_t wcm_config;
     wcm_config.interface = CY_WCM_INTERFACE_TYPE_STA;
 
-    printf("WiFi-Scan app (FreeRTOS %s) \r\n\r\n",
-           tskKERNEL_VERSION_NUMBER);
     if (stm32_cypal_wifi_sdio_init(&SDHandle) != CY_RSLT_SUCCESS)
     {
         printf("\r\n    ERROR: Init failed\r\n\r\n");
         Error_Handler();
     }
-    printf("1\n");
-
     /* wcm init */
     result = cy_wcm_init(&wcm_config);
     if (CY_RSLT_SUCCESS != result)
@@ -108,7 +107,6 @@ void WiFiTask(void* argument)
         printf("Failed to initialize Wi-Fi\r\n");
         Error_Handler();
     }
-    printf("2\n");
     #if WIFI_CONNECT_ENABLE
     /* Wi-Fi connect */
     wifi_connect();
@@ -136,6 +134,7 @@ void WiFiTask(void* argument)
             {
                 xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);
             }
+
             /* Add Delay before starting the scan again */
             vTaskDelay(pdMS_TO_TICKS(SCAN_DELAY_MS));
         }
@@ -208,14 +207,14 @@ void scan_result_callback(cy_wcm_scan_result_t* result_ptr, void* user_data,
                      * repeating BSSID in scan results
                      */
                     memcpy(&last_bssid, &result_ptr->BSSID[0], sizeof(last_bssid));
-                    printf(" %2ld   %-32s     %4d     %3d      %02X:%02X:%02X:%02X:%02X:%02X"
+                    /*printf(" %2ld   %-32s     %4d     %3d      %02X:%02X:%02X:%02X:%02X:%02X"
                            "         %-15s\r\n",
                            scan_data->result_count, result_ptr->SSID,
                            result_ptr->signal_strength, result_ptr->channel,
                            result_ptr->BSSID[0], result_ptr->BSSID[1],
                            result_ptr->BSSID[2], result_ptr->BSSID[3],
                            result_ptr->BSSID[4], result_ptr->BSSID[5],
-                           security_to_str((whd_security_t)result_ptr->security));
+                           security_to_str((whd_security_t)result_ptr->security));*/
                 }
             }
         }
@@ -418,6 +417,7 @@ void wifi_connect()
             printf("Ping failed !! Module %lx Code %lx\r\n", CY_RSLT_GET_MODULE(
                        result), CY_RSLT_GET_CODE(result));
         }
+        vTaskDelay(20000);
         printf("Disconnecting ... \r\n");
         result = cy_wcm_disconnect_ap();
         if (result != CY_RSLT_SUCCESS)

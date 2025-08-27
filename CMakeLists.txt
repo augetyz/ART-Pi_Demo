@@ -40,23 +40,27 @@ add_executable(${CMAKE_PROJECT_NAME})
 # Add STM32CubeMX generated sources
 add_subdirectory(cmake/stm32cubemx)
 
+file(GLOB_RECURSE APP_SOURCES
+    "App/Src/*.c"
+)
 # Link directories setup
 target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined library search paths
 )
 target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
-#        CY_USING_HAL
 )
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
-    App/Task_Wifi.c
+    ${APP_SOURCES}
 )
-
+set(APP_Include_Dirs
+        ${CMAKE_SOURCE_DIR}/App/Inc
+)
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
-    App
+    ${APP_Include_Dirs}
 )
 
 # Add project symbols (macros)
@@ -67,6 +71,5 @@ target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
 # Add linked libraries
 target_link_libraries(${CMAKE_PROJECT_NAME}
     stm32cubemx
-
     # Add user defined libraries
 )

@@ -4,8 +4,8 @@ ENTRY(Reset_Handler)
 /* Highest address of the user mode stack */
 _estack          = ORIGIN(DTCMRAM) + LENGTH(DTCMRAM);    /* end of RAM */
 /* Generate a link error if heap and stack don't fit into RAM */
-_Min_Heap_Size   = 0x60000;      /* required amount of heap  */
-_Min_Stack_Size  = 0x8000;       /* required amount of stack */
+_Min_Heap_Size   = 0x1E000;      /* required amount of heap  */
+_Min_Stack_Size  = 0x2000;       /* required amount of stack */
 
 /* Specify the memory areas */
 MEMORY
@@ -157,7 +157,7 @@ SECTIONS
         PROVIDE(_heap_start = .);
         . = . + _Min_Heap_Size;
         PROVIDE(_heap_end = .);
-    } >RAM
+    } >DTCMRAM
 
     /* 栈 */
     ._stack :
@@ -166,7 +166,7 @@ SECTIONS
         PROVIDE(_stack_start = .); /* 栈顶 */
         . = . + _Min_Stack_Size;
         PROVIDE(_stack_end = .);   /* 栈底 */
-    } >RAM
+    } >DTCMRAM
 
     /* Remove information from the standard libraries */
     /DISCARD/ :

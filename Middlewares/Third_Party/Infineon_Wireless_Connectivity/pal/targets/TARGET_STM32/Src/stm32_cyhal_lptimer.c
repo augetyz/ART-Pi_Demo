@@ -431,7 +431,7 @@ cy_rslt_t cyhal_lptimer_init(cyhal_lptimer_t* obj)
         if ((rslt == CY_RSLT_SUCCESS) &&
             (_stm32_cypal_lptimer_get_irqn(obj->hlptimer, &irqn) == CY_RSLT_SUCCESS))
         {
-            HAL_NVIC_SetPriority(irqn, 0, 0);
+            HAL_NVIC_SetPriority(irqn, 5, 0);
             HAL_NVIC_EnableIRQ(irqn);
         }
 
