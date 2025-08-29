@@ -18,6 +18,9 @@
 #include "Task_BlueTooth.h"
 
 #include <cyabs_rtos.h>
+#include <tim.h>
+#include <usart.h>
+#include <wifi_bt_if.h>
 
 #include "wiced_bt_types.h"
 #include "cybt_platform_trace.h"
@@ -35,8 +38,8 @@
 #define MAX_STRING_LENGTH              20
 
 /* 自定义服务UUID */
-#define UUID_COMM_SERVICE              {0x66, 0x9a, 0x0c, 0x20, 0x00, 0x08, 0x96, 0x9e, 0xe2, 0x11, 0x9e, 0xb1, 0x18, 0x11, 0xec, 0xdb}
-#define UUID_COMM_CHARACTERISTIC       {0x66, 0x9a, 0x0c, 0x20, 0x00, 0x08, 0x96, 0x9e, 0xe2, 0x11, 0x9e, 0xb1, 0xc8, 0x22, 0xec, 0xdb}
+#define UUID_COMM_SERVICE              0x66, 0x9a, 0x0c, 0x20, 0x00, 0x08, 0x96, 0x9e, 0xe2, 0x11, 0x9e, 0xb1, 0x18, 0x11, 0xec, 0xdb
+#define UUID_COMM_CHARACTERISTIC       0x66, 0x9a, 0x0c, 0x20, 0x00, 0x08, 0x96, 0x9e, 0xe2, 0x11, 0x9e, 0xb1, 0xc8, 0x22, 0xec, 0xdb
 
 /* GATT数据库句柄 */
 #define HANDLE_COMM_SERVICE            0x0001
@@ -318,6 +321,10 @@ void print_bd_address(uint8_t *bd_addr)
  **************************************************************************************************/
 void BLE_App_Start(void)
 {
+    stm32_cypal_bt_init(&huart3, &hlptim1);
+    /* configure BLE Platform */
+    cybt_platform_config_init(&bt_platform_cfg_settings);
+    /* Start BLE Communication */
     WICED_BT_TRACE("BLE Communication Start\n");
 
     /* 初始化状态 */

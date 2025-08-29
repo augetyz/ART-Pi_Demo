@@ -148,10 +148,6 @@ int main(void)
     LED_B_GPIO_Port->ODR |= LED_B_Pin;
     printf("Hello World!\n");
 
-    stm32_cypal_bt_init(&huart3, &hlptim1);
-    /* configure BLE Platform */
-    cybt_platform_config_init(&bt_platform_cfg_settings);
-    /* Start BLE Communication */
     BLE_App_Start();
     /* Init scheduler */
     osKernelInitialize();
@@ -294,7 +290,7 @@ void MPU_Config(void)
     */
     MPU_InitStruct.Enable = MPU_REGION_ENABLE;
     MPU_InitStruct.Number = MPU_REGION_NUMBER1;
-    MPU_InitStruct.BaseAddress = 0x2400000;
+    MPU_InitStruct.BaseAddress = 0x24000000;
     MPU_InitStruct.Size = MPU_REGION_SIZE_512KB;
     MPU_InitStruct.SubRegionDisable = 0x0;
     MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL1;
@@ -309,7 +305,7 @@ void MPU_Config(void)
     MPU_InitStruct.Enable = MPU_REGION_ENABLE;
     MPU_InitStruct.Number = MPU_REGION_NUMBER2;
     MPU_InitStruct.BaseAddress = 0x30000000;
-    MPU_InitStruct.Size = MPU_REGION_SIZE_256KB + MPU_REGION_SIZE_32KB;
+    MPU_InitStruct.Size = MPU_REGION_SIZE_512KB;
     MPU_InitStruct.SubRegionDisable = 0x0;
     MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL1;
     MPU_InitStruct.AccessPermission = MPU_REGION_FULL_ACCESS;
