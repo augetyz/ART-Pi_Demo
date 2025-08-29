@@ -73,9 +73,10 @@ void Error_Handler(void);
 #define BT_HOST_WAKE_GPIO_Port GPIOC
 
 /* USER CODE BEGIN Private defines */
-#define FastCode __attribute__((section(".FastFlash")))
-#define SlowCode __attribute__((section(".SlowFlash")))
-#define ExtSRAM __attribute__((section(".ExtSRAM")))
+#define FastCode  __attribute__((section(".FastFlash")))
+#define SlowCode  __attribute__((section(".SlowFlash")))
+#define ExtSRAM   __attribute__((section(".ExtSRAM")))
+#define ZWSRAM    __attribute__((section(".ZW_Data")))
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

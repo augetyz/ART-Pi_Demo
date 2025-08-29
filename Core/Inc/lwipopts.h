@@ -257,12 +257,12 @@
 /**
  * PBUF_POOL_SIZE: the number of buffers in the pbuf pool.
  */
-#define PBUF_POOL_SIZE                  60
+#define PBUF_POOL_SIZE                  80
 
 /**
  * PBUF_POOL_BUFSIZE: the size of each pbuf in the pbuf pool.
  */
-#define PBUF_POOL_BUFSIZE               1800
+#define PBUF_POOL_BUFSIZE               2048
 
 /**
  * MEMP_NUM_NETBUF: the number of struct netbufs.

@@ -65,11 +65,29 @@ SECTIONS
     } >QSPI
 
     /* 在SDRAM区域内添加自定义段 */
-    .sdram_data : {
+    .sdram_data :
+    {
       . = ALIGN(4);       /* 4字节对齐 */
       *(.ExtSRAM)      /* 匹配所有标记为.sdram_data的段 */
       . = ALIGN(4);
     } > SDRAM             /* 指定段存储到SDRAM区域 */
+
+    /* 在RAM区域内添加自定义段 */
+    .ZW_Data :
+    {
+      . = ALIGN(4);       /* 4字节对齐 */
+      *(.ZW_Data)      /* 匹配所有标记为.ZW_Data的段 */
+      . = ALIGN(4);
+    } > DTCMRAM             /* 指定段存储到DTCMRAM区域 */
+
+    /* 在SDRAM区域内添加自定义段 */
+    .EmbedRAM :
+    {
+      . = ALIGN(4);       /* 4字节对齐 */
+      *(.EmbedRAM)      /* 匹配所有标记为.EmbedRAM的段 */
+      . = ALIGN(4);
+    } > RAM_D2             /* 指定段存储到RAM_D2区域 */
+
     /* Constant data goes into FLASH */
     .rodata :
     {
@@ -139,7 +157,7 @@ SECTIONS
 
         . = ALIGN(4);
         _edata = .;        /* define a global symbol at data end */
-    } >RAM_D2 AT> QSPI
+    } >RAM AT> QSPI
 
     /* Uninitialized data section */
     . = ALIGN(4);
@@ -155,7 +173,7 @@ SECTIONS
         . = ALIGN(4);
         _ebss = .;         /* define a global symbol at bss end */
         __bss_end__ = _ebss;
-    } >RAM_D2
+    } >RAM
 
     /* User_heap_stack section, used to check that there is enough RAM left */
     /* 堆 */

@@ -1,6 +1,8 @@
-
 /* Includes ------------------------------------------------------------------*/
 #include "Task_Wifi.h"
+
+#include <sockets.h>
+
 #include "main.h"
 #include "cmsis_os2.h"
 #include "cyhal_sdio.h"
@@ -28,15 +30,15 @@ typedef struct
 /* Private macro -------------------------------------------------------------*/
 /* Wi-Fi Connection related parameters */
 #if  !defined(WIFI_CONNECT_ENABLE)
-   #define WIFI_CONNECT_ENABLE             (0) /* Enable/Disable Wi-Fi Connect */
+#define WIFI_CONNECT_ENABLE             (0) /* Enable/Disable Wi-Fi Connect */
 #endif /* (WIFI_CONNECT_ENABLE) */
 #if  !defined(WIFI_SSID)
-   // #define WIFI_SSID                       "Sparkle"
-   #define WIFI_SSID                       "ZYITC_OFFICE"
+// #define WIFI_SSID                       "Sparkle"
+#define WIFI_SSID                       "ZYITC_OFFICE"
 #endif /* (WIFI_SSID) */
 #if  !defined(WIFI_PASSWORD)
-   // #define WIFI_PASSWORD                   "123456789"
-   #define WIFI_PASSWORD                   "ZYoffice2024*"
+// #define WIFI_PASSWORD                   "123456789"
+#define WIFI_PASSWORD                   "ZYoffice2024*"
 #endif /* (WIFI_PASSWORD) */
 
 #define WIFI_SECURITY                       CY_WCM_SECURITY_WPA2_AES_PSK
@@ -55,22 +57,43 @@ typedef struct
            "--------------------------------------------------\r\n");
 
 /* Private variables ---------------------------------------------------------*/
+
+osThreadId_t TCP_ServerHandle;
+osThreadId_t TCP_ClientHandle;
+osThreadId_t UDP_ServerHandle;
+
+/* 信号量：Wi-Fi连接成功信号 */
+osSemaphoreId_t wifiConnectedSem;
+/* 事件标志：请求重连 */
+osEventFlagsId_t wifiEventFlags;
+#define WIFI_EVENT_RECONNECT   (1 << 0)
+
 /* Connection parameters to the Wi-Fi connection manager (WCM). */
 cy_wcm_connect_params_t connect_param;
-cy_wcm_ip_address_t     ip_addr;
-wcm_scan_data_t         scan_data;
-cy_wcm_mac_t            last_bssid;
+cy_wcm_ip_address_t ip_addr;
+wcm_scan_data_t scan_data;
+cy_wcm_mac_t last_bssid;
 
 /* Private function prototypes -----------------------------------------------*/
-void scan_result_callback(cy_wcm_scan_result_t* result_ptr, void* user_data,
+void scan_result_callback(cy_wcm_scan_result_t *result_ptr, void *user_data,
                           cy_wcm_scan_status_t status);
-const char* security_to_str(whd_security_t security);
-void wifi_connect(void);
 
-extern osThreadId_t       WiFi_TaskHandle;
+const char *security_to_str(whd_security_t security);
+
+bool wifi_connect(void);
+
+void tcp_server_task(void *argument);
+
+void tcp_client_task(void *argument);
+
+void udp_server_task(void *argument);
+
+extern osThreadId_t WiFi_TaskHandle;
+
 extern size_t get_free_heap_size(void);
+
 /* Private user code ---------------------------------------------------------*/
-SD_HandleTypeDef SDHandle = { .Instance = SDMMC2 };
+SD_HandleTypeDef SDHandle = {.Instance = SDMMC2};
 
 /***************************************************************************************************
  * Function Name: WiFiTask
@@ -89,59 +112,248 @@ SD_HandleTypeDef SDHandle = { .Instance = SDMMC2 };
  *  void
  *
  **************************************************************************************************/
-void WiFiTask(void* argument)
+void WiFiTask(void *argument)
 {
-    cy_rslt_t       result = CY_RSLT_SUCCESS;
-    cy_wcm_config_t wcm_config;
-    wcm_config.interface = CY_WCM_INTERFACE_TYPE_STA;
+    cy_wcm_config_t wcm_config = {.interface = CY_WCM_INTERFACE_TYPE_STA};
+
+    /* 信号量和事件标志初始化 */
+    wifiConnectedSem = osSemaphoreNew(3, 0, NULL); // 初始计数=0
+    wifiEventFlags = osEventFlagsNew(NULL);
 
     if (stm32_cypal_wifi_sdio_init(&SDHandle) != CY_RSLT_SUCCESS)
     {
-        printf("\r\n    ERROR: Init failed\r\n\r\n");
+        printf("Wi-Fi SDIO init failed\r\n");
         Error_Handler();
     }
-    /* wcm init */
-    result = cy_wcm_init(&wcm_config);
-    if (CY_RSLT_SUCCESS != result)
+    if (cy_wcm_init(&wcm_config) != CY_RSLT_SUCCESS)
     {
-        printf("Failed to initialize Wi-Fi\r\n");
+        printf("WCM init failed\r\n");
         Error_Handler();
     }
-    #if WIFI_CONNECT_ENABLE
-    /* Wi-Fi connect */
-    wifi_connect();
 
-    #else /* Wi-Fi Scanning in loop */
+    /* 创建子线程（先创建，等待信号量才能跑） */
+    const osThreadAttr_t TCP_Server_attributes = {
+        .name = "tcp_server",
+        .stack_size = 1024 * 8,
+        .priority = (osPriority_t) osPriorityAboveNormal,
+    };
+    TCP_ServerHandle = osThreadNew(tcp_server_task, NULL, &TCP_Server_attributes);
+
+    const osThreadAttr_t TCP_Client_attributes = {
+        .name = "tcp_client",
+        .stack_size = 1024 * 8,
+        .priority = (osPriority_t) osPriorityAboveNormal,
+    };
+    TCP_ClientHandle = osThreadNew(tcp_client_task, NULL, &TCP_Client_attributes);
+
+    const osThreadAttr_t UDP_Server_attributes = {
+        .name = "udp_server",
+        .stack_size = 1024 * 8,
+        .priority = (osPriority_t) osPriorityHigh,
+    };
+    UDP_ServerHandle = osThreadNew(udp_server_task, NULL, &UDP_Server_attributes);
+
+    while (1)
     {
-        cy_wcm_scan_filter_t scan_filter =
+        if (wifi_connect())
         {
-            .mode             = CY_WCM_SCAN_FILTER_TYPE_RSSI,
-            .param.rssi_range = CY_WCM_SCAN_RSSI_FAIR
-        };
+            /* 通知3个子线程可以运行 */
 
-        while (true)
-        {
-            /* Reset the count everytime before scanning */
-            scan_data.result_count = 0;
-            memset(last_bssid, 0, sizeof(cy_wcm_mac_t));
+            osSemaphoreRelease(wifiConnectedSem);
+            osDelay(100);
+            osSemaphoreRelease(wifiConnectedSem);
+            osDelay(100);
+            osSemaphoreRelease(wifiConnectedSem);
+            osDelay(100);
 
-            /* Print out the scan results*/
-            PRINT_SCAN_TEMPLATE();
-
-            /* Start the scan */
-            result =  cy_wcm_start_scan(scan_result_callback, &scan_data, &scan_filter);
-            if (CY_RSLT_SUCCESS == result)
-            {
-                xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);
-            }
-
-            /* Add Delay before starting the scan again */
-            vTaskDelay(pdMS_TO_TICKS(SCAN_DELAY_MS));
+            /* 挂起自己，等子线程请求重连 */
+            osEventFlagsWait(wifiEventFlags, WIFI_EVENT_RECONNECT,
+                             osFlagsWaitAny, osWaitForever);
         }
+        osDelay(2000); // 等待一会再重试
     }
-    #endif // if WIFI_CONNECT_ENABLE
 }
 
+/*
+ * TCP服务器任务
+ * 功能：创建TCP服务器，监听端口5000，接收客户端连接并回显数据
+ * 参数：argument - 任务参数（未使用）
+ */
+void tcp_server_task(void *argument)
+{
+    for (;;)
+    {
+        /* 等待Wi-Fi连接成功信号量 */
+        osSemaphoreAcquire(wifiConnectedSem, osWaitForever);
+
+        printf("TCP server ready\r\n");
+
+        int listenfd, connfd;
+        struct sockaddr_in server_addr, client_addr;
+        socklen_t addr_len = sizeof(client_addr);
+        char buf[1024];
+
+        /* 创建TCP socket */
+        listenfd = socket(AF_INET, SOCK_STREAM, 0);
+        if (listenfd < 0)
+            continue;
+
+        /* 配置服务器地址（任意IP，端口5000） */
+        memset(&server_addr, 0, sizeof(server_addr));
+        server_addr.sin_family = AF_INET;
+        server_addr.sin_port = htons(5000);
+        server_addr.sin_addr.s_addr = INADDR_ANY;
+
+        /* 绑定socket到指定端口 */
+        if (bind(listenfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0)
+        {
+            closesocket(listenfd);
+            continue;
+        }
+        /* 开始监听连接请求，最大连接队列长度为2 */
+        listen(listenfd, 2);
+
+        /* Wi-Fi保持连接时持续处理客户端请求 */
+        while (cy_wcm_is_connected_to_ap())
+        {
+            /* 接受客户端连接 */
+            connfd = accept(listenfd, (struct sockaddr*)&client_addr, &addr_len);
+            if (connfd >= 0)
+            {
+                int len;
+                /* 读取客户端数据并回显 */
+                while ((len = recv(connfd, buf, sizeof(buf)-1, 0)) > 0)
+                {
+                    buf[len] = 0;
+                    send(connfd, buf, len, 0); // 回显数据
+                }
+                closesocket(connfd);
+            }
+        }
+
+        /* 关闭监听socket */
+        closesocket(listenfd);
+        printf("TCP server stopped, Wi-Fi lost\r\n");
+
+        /* 通知WiFiTask进行重连 */
+        osEventFlagsSet(wifiEventFlags, WIFI_EVENT_RECONNECT);
+    }
+}
+
+/*
+ * TCP客户端任务
+ * 功能：创建TCP客户端，连接到指定服务器（192.168.1.48:6000），发送消息后断开连接
+ * 参数：argument - 任务参数（未使用）
+ */
+void tcp_client_task(void *argument)
+{
+    for (;;)
+    {
+        /* 等待Wi-Fi连接成功信号量 */
+        osSemaphoreAcquire(wifiConnectedSem, osWaitForever);
+        printf("TCP client ready\r\n");
+
+        /* Wi-Fi保持连接时持续尝试连接服务器 */
+        while (cy_wcm_is_connected_to_ap())
+        {
+            /* 创建TCP socket */
+            int sock = socket(AF_INET, SOCK_STREAM, 0);
+            if (sock < 0)
+            {
+                osDelay(2000);
+                continue;
+            }
+
+            struct sockaddr_in server_addr;
+            memset(&server_addr, 0, sizeof(server_addr));
+            server_addr.sin_family = AF_INET;
+            server_addr.sin_port = htons(6000); // 目标服务器端口
+            inet_aton("192.168.1.48", &server_addr.sin_addr); // 目标服务器IP
+
+            /* 连接到服务器并发送消息 */
+            if (connect(sock, (struct sockaddr*)&server_addr, sizeof(server_addr)) == 0)
+            {
+                char *msg = "Hello from STM32 TCP client";
+                printf("Connected to server, start sending data...\r\n");
+                // 持续发送数据直到连接断开
+                while (1)
+                {
+                    int bytes_sent = send(sock, msg, strlen(msg), 0);
+                    if (bytes_sent <= 0)
+                    {
+                        printf("Server disconnected or send failed, reconnecting...\r\n");
+                        break; // 连接断开，退出内部循环
+                    }
+                    osDelay(1); // 维持原有发送频率
+                }
+            }
+            closesocket(sock);
+            osDelay(3000); // 每1秒尝试重新连接
+        }
+
+        printf("TCP client stopped, Wi-Fi lost\r\n");
+        osEventFlagsSet(wifiEventFlags, WIFI_EVENT_RECONNECT);
+    }
+}
+
+/*
+ * UDP服务器任务
+ * 功能：创建UDP服务器，监听端口7000，接收客户端数据并回显
+ * 参数：argument - 任务参数（未使用）
+ */
+void udp_server_task(void *argument)
+{
+    for (;;)
+    {
+        /* 等待Wi-Fi连接成功信号量 */
+        osSemaphoreAcquire(wifiConnectedSem, osWaitForever);
+        printf("UDP server ready\r\n");
+
+        /* 创建UDP socket */
+        int sock = socket(AF_INET, SOCK_DGRAM, 0);
+        if (sock < 0)
+            continue;
+
+        struct sockaddr_in server_addr, client_addr;
+        memset(&server_addr, 0, sizeof(server_addr));
+        server_addr.sin_family = AF_INET;
+        server_addr.sin_port = htons(7000); // 监听端口7000
+        server_addr.sin_addr.s_addr = INADDR_ANY; // 绑定到所有网络接口
+
+        /* 绑定socket到指定端口 */
+        if (bind(sock, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0)
+        {
+            closesocket(sock);
+            continue;
+        }
+
+        char buf[4096];
+        socklen_t addr_len = sizeof(client_addr);
+
+        /* Wi-Fi保持连接时持续接收并回显UDP数据 */
+        while (cy_wcm_is_connected_to_ap())
+        {
+            /* 接收客户端数据 */
+            int len = recvfrom(sock, buf, sizeof(buf)-1, 0,
+                               (struct sockaddr*)&client_addr, &addr_len);
+            if (len > 0)
+            {
+                buf[len] = 0;
+                /* 回显数据到客户端 */
+                sendto(sock, buf, len, 0, (struct sockaddr*)&client_addr, addr_len);
+            }
+            else
+            {
+                osDelay(1);
+            }
+        }
+
+        closesocket(sock);
+        printf("UDP server stopped, Wi-Fi lost\r\n");
+
+        osEventFlagsSet(wifiEventFlags, WIFI_EVENT_RECONNECT);
+    }
+}
 
 /***************************************************************************************************
  * Function Name: scan_check_bssid_in_list
@@ -155,7 +367,7 @@ void WiFiTask(void* argument)
  *  bool
  *
  **************************************************************************************************/
-bool scan_check_bssid_in_list(cy_wcm_scan_result_t* result_ptr)
+bool scan_check_bssid_in_list(cy_wcm_scan_result_t *result_ptr)
 {
     bool present = false;
     if (memcmp(result_ptr->BSSID, last_bssid, sizeof(cy_wcm_mac_t)) == 0)
@@ -183,10 +395,10 @@ bool scan_check_bssid_in_list(cy_wcm_scan_result_t* result_ptr)
  *  void
  *
  **************************************************************************************************/
-void scan_result_callback(cy_wcm_scan_result_t* result_ptr, void* user_data,
+void scan_result_callback(cy_wcm_scan_result_t *result_ptr, void *user_data,
                           cy_wcm_scan_status_t status)
 {
-    wcm_scan_data_t* scan_data = (wcm_scan_data_t*)user_data;
+    wcm_scan_data_t *scan_data = (wcm_scan_data_t *) user_data;
 
     if (scan_data != NULL)
     {
@@ -198,7 +410,7 @@ void scan_result_callback(cy_wcm_scan_result_t* result_ptr, void* user_data,
         {
             if ((result_ptr != NULL) && (status == CY_WCM_SCAN_INCOMPLETE))
             {
-                if ((strlen((const char*)result_ptr->SSID) != 0) &&
+                if ((strlen((const char *) result_ptr->SSID) != 0) &&
                     (scan_check_bssid_in_list(result_ptr) == false))
                 {
                     scan_data->result_count++;
@@ -234,7 +446,7 @@ void scan_result_callback(cy_wcm_scan_result_t* result_ptr, void* user_data,
  *  char *
  *
  **************************************************************************************************/
-const char* security_to_str(whd_security_t security)
+const char *security_to_str(whd_security_t security)
 {
     switch (security)
     {
@@ -312,7 +524,7 @@ const char* security_to_str(whd_security_t security)
 /***************************************************************************************************
  * print_ip4
  **************************************************************************************************/
-static void print_ip4(uint32_t ip, char* str)
+static void print_ip4(uint32_t ip, char *str)
 {
     unsigned char bytes[4];
     bytes[0] = ip & 0xFF;
@@ -337,7 +549,8 @@ static void print_ip4(uint32_t ip, char* str)
  *  void
  *
  **************************************************************************************************/
-void wifi_connect()
+#if 0
+bool wifi_connect()
 {
     cy_rslt_t                   result = CY_RSLT_SUCCESS;
     cy_wcm_connect_params_t     connect_param;
@@ -428,8 +641,37 @@ void wifi_connect()
         vTaskDelay(pdMS_TO_TICKS(SCAN_DELAY_MS));
     }
 }
+#else
+bool wifi_connect(void)
+{
+    cy_rslt_t result;
+    cy_wcm_connect_params_t connect_param;
+    cy_wcm_ip_address_t ip_address;
 
+    memset(&connect_param, 0, sizeof(connect_param));
+    memcpy(connect_param.ap_credentials.SSID, WIFI_SSID, sizeof(WIFI_SSID));
+    memcpy(connect_param.ap_credentials.password, WIFI_PASSWORD, sizeof(WIFI_PASSWORD));
+    connect_param.ap_credentials.security = WIFI_SECURITY;
 
+    for (int retry = 0; retry < MAX_WIFI_RETRY_COUNT; retry++)
+    {
+        printf("Connecting to %s...\r\n", connect_param.ap_credentials.SSID);
+        result = cy_wcm_connect_ap(&connect_param, &ip_address);
+        if (result == CY_RSLT_SUCCESS)
+        {
+            printf("Wi-Fi connected, IP=%lu.%lu.%lu.%lu\r\n",
+                   (ip_address.ip.v4) & 0xFF,
+                   (ip_address.ip.v4 >> 8) & 0xFF,
+                   (ip_address.ip.v4 >> 16) & 0xFF,
+                   (ip_address.ip.v4 >> 24) & 0xFF);
+            return true;
+        }
+        osDelay(WIFI_CONN_RETRY_INTERVAL_MSEC);
+    }
+    printf("Wi-Fi connect failed\r\n");
+    return false;
+}
+#endif
 /***************************************************************************************************
  * Function Name: SDMMC1_IRQHandler
  ***************************************************************************************************
@@ -467,7 +709,3 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
     stm32_cyhal_gpio_irq_handler(GPIO_Pin);
 }
-
-
-
-

@@ -71,7 +71,7 @@ osThreadId_t WiFi_TaskHandle;
 osThreadId_t Debug_TaskHandle;
 const osThreadAttr_t WiFi_Task_attributes = {
     .name = "WiFi_Task",
-    .stack_size = 2048 * 4,
+    .stack_size = 2048 * 2,
     .priority = (osPriority_t) osPriorityNormal,
 };
 const osThreadAttr_t Debug_Task_attributes = {
