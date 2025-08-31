@@ -59,24 +59,11 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define LED_R_Pin GPIO_PIN_15
 #define LED_R_GPIO_Port GPIOC
-#define WIFI_HOST_WAKE_Pin GPIO_PIN_3
-#define WIFI_HOST_WAKE_GPIO_Port GPIOE
-#define WIFI_REG_ON_Pin GPIO_PIN_13
-#define WIFI_REG_ON_GPIO_Port GPIOC
 #define LED_B_Pin GPIO_PIN_8
 #define LED_B_GPIO_Port GPIOI
-#define BT_WAKE_Pin GPIO_PIN_10
-#define BT_WAKE_GPIO_Port GPIOI
-#define BT_RST_N_Pin GPIO_PIN_11
-#define BT_RST_N_GPIO_Port GPIOI
-#define BT_HOST_WAKE_Pin GPIO_PIN_0
-#define BT_HOST_WAKE_GPIO_Port GPIOC
 
 /* USER CODE BEGIN Private defines */
-#define FastCode  __attribute__((section(".FastFlash")))
-#define SlowCode  __attribute__((section(".SlowFlash")))
-#define ExtSRAM   __attribute__((section(".ExtSRAM")))
-#define ZWSRAM    __attribute__((section(".ZW_Data")))
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

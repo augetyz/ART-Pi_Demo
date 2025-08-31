@@ -450,7 +450,7 @@ HAL_StatusTypeDef HAL_MMC_Init(MMC_HandleTypeDef *hmmc)
     HAL_MMC_MspInit(hmmc);
 #endif /* USE_HAL_MMC_REGISTER_CALLBACKS */
   }
-  return HAL_OK;
+
   hmmc->State = HAL_MMC_STATE_BUSY;
 
   /* Initialize the Card parameters */

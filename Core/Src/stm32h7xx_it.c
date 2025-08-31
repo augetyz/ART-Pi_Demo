@@ -55,13 +55,11 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern TIM_HandleTypeDef htim7;
 extern TIM_HandleTypeDef htim6;
 
 /* USER CODE BEGIN EV */
-extern UART_HandleTypeDef huart3;
-extern DMA_HandleTypeDef hdma_usart3_tx;
-extern DMA_HandleTypeDef hdma_usart3_rx;
-extern LPTIM_HandleTypeDef hlptim1;
+
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -176,28 +174,20 @@ void TIM6_DAC_IRQHandler(void)
   /* USER CODE END TIM6_DAC_IRQn 1 */
 }
 
+/**
+  * @brief This function handles TIM7 global interrupt.
+  */
+void TIM7_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM7_IRQn 0 */
+
+  /* USER CODE END TIM7_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim7);
+  /* USER CODE BEGIN TIM7_IRQn 1 */
+
+  /* USER CODE END TIM7_IRQn 1 */
+}
+
 /* USER CODE BEGIN 1 */
-void EXTI3_IRQHandler(void)
-{
-  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_3);
-}
 
-void DMA1_Stream2_IRQHandler(void) // USART3 TX DMA
-{
-  HAL_DMA_IRQHandler(&hdma_usart3_tx);
-}
-
-void DMA1_Stream1_IRQHandler(void) // USART3 RX DMA
-{
-  HAL_DMA_IRQHandler(&hdma_usart3_rx);
-}
-
-void USART3_IRQHandler(void)
-{
-  HAL_UART_IRQHandler(&huart3);
-}
-void LPTIM1_IRQHandler(void)
-{
-  HAL_LPTIM_IRQHandler(&hlptim1);
-}
 /* USER CODE END 1 */
