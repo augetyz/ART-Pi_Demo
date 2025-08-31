@@ -35,7 +35,6 @@
 #include "wiced_memory.h"
 #include "sdram_fmc_drv.h"
 #include "Task_BlueTooth.h"
-#include "fatfs.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
