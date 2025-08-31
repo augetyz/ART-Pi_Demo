@@ -99,28 +99,16 @@ set(MX_Include_Dirs
 	${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/aws-iot-device-sdk-port/include
 	${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/aws-iot-device-sdk-port/source/include
 )
-
+file(GLOB CoreSrcs "${CMAKE_SOURCE_DIR}/Core/Src/*.c")
 # STM32CubeMX generated application sources
 set(MX_Application_Src
     ${CMAKE_SOURCE_DIR}/MBEDTLS/App/mbedtls.c
     ${CMAKE_SOURCE_DIR}/MBEDTLS/Target/custom_rng.c
-    ${CMAKE_SOURCE_DIR}/Core/Src/main.c
-    ${CMAKE_SOURCE_DIR}/Core/Src/gpio.c
-    ${CMAKE_SOURCE_DIR}/Core/Src/memorymap.c
-    ${CMAKE_SOURCE_DIR}/Core/Src/rng.c
-    ${CMAKE_SOURCE_DIR}/Core/Src/sdmmc.c
-    ${CMAKE_SOURCE_DIR}/Core/Src/usart.c
-    ${CMAKE_SOURCE_DIR}/Core/Src/stm32h7xx_it.c
-    ${CMAKE_SOURCE_DIR}/Core/Src/stm32h7xx_hal_msp.c
-    ${CMAKE_SOURCE_DIR}/Core/Src/stm32h7xx_hal_timebase_tim.c
-    ${CMAKE_SOURCE_DIR}/Core/Src/sysmem.c
-    ${CMAKE_SOURCE_DIR}/Core/Src/syscalls.c
-	${CMAKE_SOURCE_DIR}/Core/Src/tim.c
     ${CMAKE_SOURCE_DIR}/startup_stm32h750xx.s
+	${CoreSrcs}
 )
 # STM32 HAL/LL Drivers
 set(STM32_Drivers_Src
-    ${CMAKE_SOURCE_DIR}/Core/Src/system_stm32h7xx.c
     ${CMAKE_SOURCE_DIR}/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim.c
     ${CMAKE_SOURCE_DIR}/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim_ex.c
     ${CMAKE_SOURCE_DIR}/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_cortex.c
@@ -150,6 +138,8 @@ set(STM32_Drivers_Src
     ${CMAKE_SOURCE_DIR}/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_uart.c
     ${CMAKE_SOURCE_DIR}/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_uart_ex.c
 	${CMAKE_SOURCE_DIR}/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_lptim.c
+	${CMAKE_SOURCE_DIR}/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_sdram.c
+	${CMAKE_SOURCE_DIR}/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_fmc.c
 )
 
 # Drivers Midllewares
@@ -292,92 +282,6 @@ set(Connectivity_Src
     ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/LwIP/src/netif/ethernet.c
     ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/whd-bsp-integration/cybsp_wifi.c
     ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/whd-bsp-integration/COMPONENT_LWIP/cy_network_buffer_lwip.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/aes.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/aesni.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/arc4.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/aria.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/asn1parse.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/asn1write.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/base64.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/bignum.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/blowfish.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/camellia.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/ccm.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/certs.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/chacha20.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/chachapoly.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/cipher.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/cipher_wrap.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/cmac.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/ctr_drbg.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/debug.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/des.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/dhm.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/ecdh.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/ecdsa.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/ecjpake.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/ecp.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/ecp_curves.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/entropy.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/entropy_poll.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/error.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/gcm.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/havege.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/hkdf.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/hmac_drbg.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/md.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/md2.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/md4.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/md5.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/memory_buffer_alloc.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/net_sockets.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/nist_kw.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/oid.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/padlock.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/pem.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/pk.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/pkcs11.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/pkcs12.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/pkcs5.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/pkparse.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/pkwrite.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/pk_wrap.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/platform.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/platform_util.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/poly1305.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/psa_crypto.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/psa_crypto_driver_wrappers.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/psa_crypto_se.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/psa_crypto_slot_management.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/psa_crypto_storage.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/psa_its_file.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/ripemd160.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/rsa.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/rsa_internal.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/sha1.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/sha256.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/sha512.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/ssl_cache.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/ssl_ciphersuites.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/ssl_cli.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/ssl_cookie.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/ssl_msg.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/ssl_srv.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/ssl_ticket.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/ssl_tls.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/ssl_tls13_keys.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/threading.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/timing.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/version.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/version_features.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/x509.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/x509write_crt.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/x509write_csr.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/x509_create.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/x509_crl.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/x509_crt.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/x509_csr.c
-#    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/ARM/mbedtls/library/xtea.c
     ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/connectivity-utilities/cy_log/cy_log.c
     ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/connectivity-utilities/JSON_parser/cy_json_parser.c
     ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/connectivity-utilities/linked_list/cy_linked_list.c
@@ -433,6 +337,8 @@ set(Connectivity_Src
 	${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/wifi-host-driver/COMPONENT_WIFI5/resources/firmware/COMPONENT_43438/43438A1_bin.c
 	${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_Wireless_Connectivity/wifi-host-driver/COMPONENT_WIFI5/resources/clm/COMPONENT_43438/43438A1_clm_blob.c
 )
+file(GLOB_RECURSE Middleware_Srcs "${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/FatFs/*.c")
+
 set(Middleware_Src
     ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_RTOS_Middleware/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.c
     ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_RTOS_Middleware/FreeRTOS/Source/list.c
@@ -444,6 +350,7 @@ set(Middleware_Src
     ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_RTOS_Middleware/FreeRTOS/Source/timers.c
 	${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_RTOS_Middleware/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c
 	${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/Infineon_RTOS_Middleware/FreeRTOS/Source/portable/MemMang/heap_4.c
+	${Middleware_Srcs}
 )
 
 # Link directories setup

@@ -19,7 +19,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "mbedtls.h"
-#include "memorymap.h"
 #include "rng.h"
 #include "sdmmc.h"
 #include "usart.h"
@@ -28,24 +27,15 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <cybt_platform_config.h>
+#include <fmc.h>
 #include <stdio.h>
 #include "cmsis_os2.h"
 #include "stm32_cyhal_sdio_ex.h"
-#include "stm32_cyhal_gpio_ex.h"
-#include "wifi_bt_if.h"
-#include "cyhal_gpio.h"
-#include <stdio.h>
-#include "cmsis_os2.h"
-#include "cyhal_sdio.h"
-#include "cybsp.h"
-#include "cyhal.h"
 #include "cyabs_rtos.h"
-#include "wiced_bt_stack.h"
 #include "wiced_memory.h"
-#include "wiced_bt_dev.h"
-#include "cybt_platform_trace.h"
-#include "cy_utils.h"
+#include "sdram_fmc_drv.h"
 #include "Task_BlueTooth.h"
+#include "fatfs.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -141,6 +131,8 @@ int main(void)
     MX_USART3_UART_Init();
     MX_RNG_Init();
     MX_LPTIM1_Init();
+    MX_FMC_Init();
+    SDRAM_Init();
     /* Call PreOsInit function */
     /* USER CODE BEGIN 2 */
 
