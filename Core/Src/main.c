@@ -19,8 +19,10 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include "fatfs.h"
 #include "memorymap.h"
 #include "rng.h"
+#include "sdmmc.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -116,6 +118,8 @@ int main(void)
   MX_UART4_Init();
   MX_RNG_Init();
   MX_TIM7_Init();
+  MX_SDMMC1_SD_Init();
+  MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -125,7 +129,7 @@ int main(void)
 
   /* Call init function for freertos objects (in cmsis_os2.c) */
   MX_FREERTOS_Init();
-  Debug_TaskHandle = osThreadNew(DebugTask, NULL, &Debug_Task_attributes);
+
   /* Start scheduler */
   osKernelStart();
 
