@@ -12,8 +12,8 @@ set(MX_Defines_Syms
 # STM32CubeMX generated include paths
 set(MX_Include_Dirs
     ${CMAKE_SOURCE_DIR}/Core/Inc
-    ${CMAKE_SOURCE_DIR}/FATFS/Target
-    ${CMAKE_SOURCE_DIR}/FATFS/App
+    ${CMAKE_SOURCE_DIR}/Bsp/FATFS/Target
+    ${CMAKE_SOURCE_DIR}/Bsp/FATFS/App
     ${CMAKE_SOURCE_DIR}/Drivers/STM32H7xx_HAL_Driver/Inc
     ${CMAKE_SOURCE_DIR}/Drivers/STM32H7xx_HAL_Driver/Inc/Legacy
     ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/FreeRTOS/Source/include
@@ -26,9 +26,9 @@ set(MX_Include_Dirs
 
 # STM32CubeMX generated application sources
 set(MX_Application_Src
-    ${CMAKE_SOURCE_DIR}/FATFS/App/fatfs.c
-    ${CMAKE_SOURCE_DIR}/FATFS/Target/bsp_driver_sd.c
-    ${CMAKE_SOURCE_DIR}/FATFS/Target/sd_diskio.c
+    ${CMAKE_SOURCE_DIR}/Bsp/FATFS/App/fatfs.c
+    ${CMAKE_SOURCE_DIR}/Bsp/FATFS/Target/bsp_driver_sd.c
+    ${CMAKE_SOURCE_DIR}/Bsp/FATFS/Target/sd_diskio.c
     ${CMAKE_SOURCE_DIR}/Core/Src/main.c
     ${CMAKE_SOURCE_DIR}/Core/Src/gpio.c
     ${CMAKE_SOURCE_DIR}/Core/Src/freertos.c
@@ -108,7 +108,9 @@ set(MX_LINK_DIRS
 # Project static libraries
 set(MX_LINK_LIBS 
     STM32_Drivers
-    FreeRTOS	FatFs	
+    FreeRTOS
+	FatFs
+	
 )
 # Interface library for includes and symbols
 add_library(stm32cubemx INTERFACE)

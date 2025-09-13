@@ -83,6 +83,11 @@ void HAL_SD_MspInit(SD_HandleTypeDef* sdHandle)
     PC8     ------> SDMMC1_D0
     PC9     ------> SDMMC1_D1
     */
+    GPIO_InitStruct.Pin = GPIO_PIN_5;
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+
     GPIO_InitStruct.Pin = GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12|GPIO_PIN_8
                           |GPIO_PIN_9;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
