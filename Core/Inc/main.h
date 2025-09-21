@@ -53,7 +53,7 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+extern void my_printf(const char *fmt, ...);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -63,7 +63,9 @@ void Error_Handler(void);
 #define LED_B_GPIO_Port GPIOI
 
 /* USER CODE BEGIN Private defines */
-
+#define DMA_DATA    __attribute__((section(".EmbedRAM")))
+#define ZW_DATA     __attribute__((section(".ZW_Data")))
+#define EXT_SRAM    __attribute__((section(".ExtSRAM")))
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

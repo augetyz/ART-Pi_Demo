@@ -51,7 +51,7 @@
 /* #define HAL_NOR_MODULE_ENABLED   */
 /* #define HAL_OTFDEC_MODULE_ENABLED   */
 /* #define HAL_SRAM_MODULE_ENABLED   */
-/* #define HAL_SDRAM_MODULE_ENABLED   */
+#define HAL_SDRAM_MODULE_ENABLED
 /* #define HAL_HASH_MODULE_ENABLED   */
 /* #define HAL_HRTIM_MODULE_ENABLED   */
 /* #define HAL_HSEM_MODULE_ENABLED   */
@@ -80,7 +80,7 @@
 /* #define HAL_IRDA_MODULE_ENABLED   */
 /* #define HAL_SMARTCARD_MODULE_ENABLED   */
 /* #define HAL_WWDG_MODULE_ENABLED   */
-/* #define HAL_PCD_MODULE_ENABLED   */
+#define HAL_PCD_MODULE_ENABLED
 /* #define HAL_HCD_MODULE_ENABLED   */
 /* #define HAL_DFSDM_MODULE_ENABLED   */
 /* #define HAL_DSI_MODULE_ENABLED   */
@@ -186,7 +186,7 @@
 #define  USE_HAL_FMAC_REGISTER_CALLBACKS    0U /* FMAC register callback disabled  */
 #define  USE_HAL_NAND_REGISTER_CALLBACKS    0U /* NAND register callback disabled    */
 #define  USE_HAL_NOR_REGISTER_CALLBACKS     0U /* NOR register callback disabled     */
-#define  USE_HAL_SDRAM_REGISTER_CALLBACKS   0U /* SDRAM register callback disabled   */
+#define  USE_HAL_SDRAM_REGISTER_CALLBACKS   1U /* SDRAM register callback disabled   */
 #define  USE_HAL_SRAM_REGISTER_CALLBACKS    0U /* SRAM register callback disabled    */
 #define  USE_HAL_HASH_REGISTER_CALLBACKS    0U /* HASH register callback disabled    */
 #define  USE_HAL_HCD_REGISTER_CALLBACKS     0U /* HCD register callback disabled     */
