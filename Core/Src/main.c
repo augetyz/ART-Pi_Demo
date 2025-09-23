@@ -219,6 +219,10 @@ void SystemClock_Config(void)
     {
         Error_Handler();
     }
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+    DWT->LAR = 0xC5ACCE55;     // 解锁，H7 必须加
+    DWT->CYCCNT = 0;
+    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 }
 
 /* USER CODE BEGIN 4 */
