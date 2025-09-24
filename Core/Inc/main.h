@@ -31,7 +31,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -73,10 +73,19 @@ void Error_Handler(void);
 #define BT_HOST_WAKE_GPIO_Port GPIOC
 
 /* USER CODE BEGIN Private defines */
+#define LTDC_BUFF_ADDR 0XC0000000
+#define LCD_BL_Pin GPIO_PIN_4
+#define LCD_BL_GPIO_Port GPIOD
+#define TS_RST_Pin GPIO_PIN_3
+#define TS_RST_GPIO_Port GPIOD
+#define TS_INT_Pin GPIO_PIN_3
+#define TS_INT_GPIO_Port GPIOD
+
 #define FastCode  __attribute__((section(".FastFlash")))
 #define SlowCode  __attribute__((section(".SlowFlash")))
 #define ExtSRAM   __attribute__((section(".ExtSRAM")))
 #define ZWSRAM    __attribute__((section(".ZW_Data")))
+#define DMARAM  __attribute__((section(".EmbedRAM")))
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

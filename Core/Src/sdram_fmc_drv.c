@@ -52,7 +52,7 @@ void SDRAM_Init(void)
       = 64000(64 ms) / 4096 *108MHz - 20
       = 1667.5 取值1668
     */
-    HAL_SDRAM_ProgramRefreshRate(&hsdram1, 1668);
+    HAL_SDRAM_ProgramRefreshRate(&hsdram1, 1855);
 }
 /*********************************************************************************************************
 *	函 数 名: bsp_TestExtSDRAM

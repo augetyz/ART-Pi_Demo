@@ -58,10 +58,12 @@
 extern TIM_HandleTypeDef htim6;
 
 /* USER CODE BEGIN EV */
-extern UART_HandleTypeDef huart3;
-extern DMA_HandleTypeDef hdma_usart3_tx;
-extern DMA_HandleTypeDef hdma_usart3_rx;
+extern UART_HandleTypeDef  huart3;
+extern DMA_HandleTypeDef   hdma_usart3_tx;
+extern DMA_HandleTypeDef   hdma_usart3_rx;
 extern LPTIM_HandleTypeDef hlptim1;
+extern DMA2D_HandleTypeDef hdma2d;
+extern LTDC_HandleTypeDef  hltdc;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -72,14 +74,14 @@ extern LPTIM_HandleTypeDef hlptim1;
   */
 void NMI_Handler(void)
 {
-  /* USER CODE BEGIN NonMaskableInt_IRQn 0 */
+    /* USER CODE BEGIN NonMaskableInt_IRQn 0 */
 
-  /* USER CODE END NonMaskableInt_IRQn 0 */
-  /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
-   while (1)
-  {
-  }
-  /* USER CODE END NonMaskableInt_IRQn 1 */
+    /* USER CODE END NonMaskableInt_IRQn 0 */
+    /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
+    while (1)
+    {
+    }
+    /* USER CODE END NonMaskableInt_IRQn 1 */
 }
 
 /**
@@ -87,14 +89,14 @@ void NMI_Handler(void)
   */
 void HardFault_Handler(void)
 {
-  /* USER CODE BEGIN HardFault_IRQn 0 */
+    /* USER CODE BEGIN HardFault_IRQn 0 */
 
-  /* USER CODE END HardFault_IRQn 0 */
-  while (1)
-  {
-    /* USER CODE BEGIN W1_HardFault_IRQn 0 */
-    /* USER CODE END W1_HardFault_IRQn 0 */
-  }
+    /* USER CODE END HardFault_IRQn 0 */
+    while (1)
+    {
+        /* USER CODE BEGIN W1_HardFault_IRQn 0 */
+        /* USER CODE END W1_HardFault_IRQn 0 */
+    }
 }
 
 /**
@@ -102,14 +104,14 @@ void HardFault_Handler(void)
   */
 void MemManage_Handler(void)
 {
-  /* USER CODE BEGIN MemoryManagement_IRQn 0 */
+    /* USER CODE BEGIN MemoryManagement_IRQn 0 */
 
-  /* USER CODE END MemoryManagement_IRQn 0 */
-  while (1)
-  {
-    /* USER CODE BEGIN W1_MemoryManagement_IRQn 0 */
-    /* USER CODE END W1_MemoryManagement_IRQn 0 */
-  }
+    /* USER CODE END MemoryManagement_IRQn 0 */
+    while (1)
+    {
+        /* USER CODE BEGIN W1_MemoryManagement_IRQn 0 */
+        /* USER CODE END W1_MemoryManagement_IRQn 0 */
+    }
 }
 
 /**
@@ -117,14 +119,14 @@ void MemManage_Handler(void)
   */
 void BusFault_Handler(void)
 {
-  /* USER CODE BEGIN BusFault_IRQn 0 */
+    /* USER CODE BEGIN BusFault_IRQn 0 */
 
-  /* USER CODE END BusFault_IRQn 0 */
-  while (1)
-  {
-    /* USER CODE BEGIN W1_BusFault_IRQn 0 */
-    /* USER CODE END W1_BusFault_IRQn 0 */
-  }
+    /* USER CODE END BusFault_IRQn 0 */
+    while (1)
+    {
+        /* USER CODE BEGIN W1_BusFault_IRQn 0 */
+        /* USER CODE END W1_BusFault_IRQn 0 */
+    }
 }
 
 /**
@@ -132,14 +134,14 @@ void BusFault_Handler(void)
   */
 void UsageFault_Handler(void)
 {
-  /* USER CODE BEGIN UsageFault_IRQn 0 */
+    /* USER CODE BEGIN UsageFault_IRQn 0 */
 
-  /* USER CODE END UsageFault_IRQn 0 */
-  while (1)
-  {
-    /* USER CODE BEGIN W1_UsageFault_IRQn 0 */
-    /* USER CODE END W1_UsageFault_IRQn 0 */
-  }
+    /* USER CODE END UsageFault_IRQn 0 */
+    while (1)
+    {
+        /* USER CODE BEGIN W1_UsageFault_IRQn 0 */
+        /* USER CODE END W1_UsageFault_IRQn 0 */
+    }
 }
 
 /**
@@ -147,12 +149,12 @@ void UsageFault_Handler(void)
   */
 void DebugMon_Handler(void)
 {
-  /* USER CODE BEGIN DebugMonitor_IRQn 0 */
+    /* USER CODE BEGIN DebugMonitor_IRQn 0 */
 
-  /* USER CODE END DebugMonitor_IRQn 0 */
-  /* USER CODE BEGIN DebugMonitor_IRQn 1 */
+    /* USER CODE END DebugMonitor_IRQn 0 */
+    /* USER CODE BEGIN DebugMonitor_IRQn 1 */
 
-  /* USER CODE END DebugMonitor_IRQn 1 */
+    /* USER CODE END DebugMonitor_IRQn 1 */
 }
 
 /******************************************************************************/
@@ -167,37 +169,80 @@ void DebugMon_Handler(void)
   */
 void TIM6_DAC_IRQHandler(void)
 {
-  /* USER CODE BEGIN TIM6_DAC_IRQn 0 */
+    /* USER CODE BEGIN TIM6_DAC_IRQn 0 */
 
-  /* USER CODE END TIM6_DAC_IRQn 0 */
-  HAL_TIM_IRQHandler(&htim6);
-  /* USER CODE BEGIN TIM6_DAC_IRQn 1 */
+    /* USER CODE END TIM6_DAC_IRQn 0 */
+    HAL_TIM_IRQHandler(&htim6);
+    /* USER CODE BEGIN TIM6_DAC_IRQn 1 */
 
-  /* USER CODE END TIM6_DAC_IRQn 1 */
+    /* USER CODE END TIM6_DAC_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */
 void EXTI3_IRQHandler(void)
 {
-  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_3);
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_3);
 }
 
 void DMA1_Stream2_IRQHandler(void) // USART3 TX DMA
 {
-  HAL_DMA_IRQHandler(&hdma_usart3_tx);
+    HAL_DMA_IRQHandler(&hdma_usart3_tx);
 }
 
 void DMA1_Stream1_IRQHandler(void) // USART3 RX DMA
 {
-  HAL_DMA_IRQHandler(&hdma_usart3_rx);
+    HAL_DMA_IRQHandler(&hdma_usart3_rx);
 }
 
 void USART3_IRQHandler(void)
 {
-  HAL_UART_IRQHandler(&huart3);
+    HAL_UART_IRQHandler(&huart3);
 }
+
 void LPTIM1_IRQHandler(void)
 {
-  HAL_LPTIM_IRQHandler(&hlptim1);
+    HAL_LPTIM_IRQHandler(&hlptim1);
 }
+
+/**
+  * @brief This function handles LTDC global interrupt.
+  */
+void LTDC_IRQHandler(void)
+{
+    /* USER CODE BEGIN LTDC_IRQn 0 */
+
+    /* USER CODE END LTDC_IRQn 0 */
+    HAL_LTDC_IRQHandler(&hltdc);
+    /* USER CODE BEGIN LTDC_IRQn 1 */
+    if (LTDC->ISR & LTDC_ISR_LIF)
+    {
+        // 清除中断标志
+        LTDC->ICR = LTDC_ICR_CLIF;
+        // 在此处添加你的中断处理代�?
+    }
+    /* USER CODE END LTDC_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMA2D global interrupt.
+  */
+void DMA2D_IRQHandler(void)
+{
+    /* USER CODE BEGIN DMA2D_IRQn 0 */
+
+    /* USER CODE END DMA2D_IRQn 0 */
+    HAL_DMA2D_IRQHandler(&hdma2d);
+    DMA2D->CR &= ~DMA2D_CR_TCIE;
+    DMA2D->IFCR |= 1 << 1; //清除传输完成标志
+    /* USER CODE BEGIN DMA2D_IRQn 1 */
+    // if(g_gpu_state==1)
+    // {
+    //   DMA2D->CR &= ~DMA2D_CR_TCIE;
+    //   DMA2D->IFCR |= 1<<1;//清除传输完成标志
+    //   lv_disp_flush_ready(&disp_drv);
+    //   //      g_gpu_state=0;
+    // }
+    /* USER CODE END DMA2D_IRQn 1 */
+}
+
 /* USER CODE END 1 */

@@ -35,7 +35,10 @@
 #include "wiced_memory.h"
 #include "sdram_fmc_drv.h"
 #include "Task_BlueTooth.h"
-
+#include "dma2d.h"
+#include "gt911.h"
+#include "i2c.h"
+#include "ltdc.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -57,8 +60,9 @@
 
 /* USER CODE BEGIN PV */
 /* Definitions for WiFi_Task */
-osThreadId_t WiFi_TaskHandle;
-osThreadId_t Debug_TaskHandle;
+osThreadId_t         WiFi_TaskHandle;
+osThreadId_t         Debug_TaskHandle;
+osThreadId_t         Gui_TaskHandle;
 const osThreadAttr_t WiFi_Task_attributes = {
     .name = "WiFi_Task",
     .stack_size = 2048 * 2,
@@ -67,6 +71,11 @@ const osThreadAttr_t WiFi_Task_attributes = {
 const osThreadAttr_t Debug_Task_attributes = {
     .name = "Debug_Task",
     .stack_size = 2048 * 1,
+    .priority = (osPriority_t) osPriorityLow,
+};
+const osThreadAttr_t Gui_Task_attributes = {
+    .name = "Gui_Task",
+    .stack_size = 2048 * 2,
     .priority = (osPriority_t) osPriorityLow,
 };
 /* USER CODE END PV */
@@ -78,7 +87,11 @@ static void MPU_Config(void);
 
 /* USER CODE BEGIN PFP */
 void WiFiTask(void *argument);
+
 void DebugTask(void *argument);
+
+void GuiTask(void *argument);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -131,21 +144,23 @@ int main(void)
     MX_USART3_UART_Init();
     MX_RNG_Init();
     MX_LPTIM1_Init();
+    MX_I2C1_Init();
     MX_FMC_Init();
     SDRAM_Init();
+    MX_DMA2D_Init();
+    MX_LTDC_Init();
     /* Call PreOsInit function */
     /* USER CODE BEGIN 2 */
-
     LED_R_GPIO_Port->ODR |= LED_R_Pin;
     LED_B_GPIO_Port->ODR |= LED_B_Pin;
     printf("Hello World!\n");
-
-    BLE_App_Start();
+    // BLE_App_Start();
     /* Init scheduler */
     osKernelInitialize();
     /* creation of defaultTask */
-    WiFi_TaskHandle = osThreadNew(WiFiTask, NULL, &WiFi_Task_attributes);
-    Debug_TaskHandle = osThreadNew(DebugTask, NULL, &Debug_Task_attributes);
+    // WiFi_TaskHandle = osThreadNew(WiFiTask, NULL, &WiFi_Task_attributes);
+    // Debug_TaskHandle = osThreadNew(DebugTask, NULL, &Debug_Task_attributes);
+    Gui_TaskHandle   = osThreadNew(GuiTask, NULL, &Gui_Task_attributes);
     /* Start scheduler */
     osKernelStart();
     /* USER CODE END 2 */
@@ -186,18 +201,18 @@ void SystemClock_Config(void)
     * in the RCC_OscInitTypeDef structure.
     */
     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48 | RCC_OSCILLATORTYPE_HSE;
-    RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-    RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
-    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-    RCC_OscInitStruct.PLL.PLLM = 5;
-    RCC_OscInitStruct.PLL.PLLN = 192;
-    RCC_OscInitStruct.PLL.PLLP = 2;
-    RCC_OscInitStruct.PLL.PLLQ = 4;
-    RCC_OscInitStruct.PLL.PLLR = 2;
-    RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_2;
-    RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOWIDE;
-    RCC_OscInitStruct.PLL.PLLFRACN = 0;
+    RCC_OscInitStruct.HSEState       = RCC_HSE_ON;
+    RCC_OscInitStruct.HSI48State     = RCC_HSI48_ON;
+    RCC_OscInitStruct.PLL.PLLState   = RCC_PLL_ON;
+    RCC_OscInitStruct.PLL.PLLSource  = RCC_PLLSOURCE_HSE;
+    RCC_OscInitStruct.PLL.PLLM       = 5;
+    RCC_OscInitStruct.PLL.PLLN       = 192;
+    RCC_OscInitStruct.PLL.PLLP       = 2;
+    RCC_OscInitStruct.PLL.PLLQ       = 4;
+    RCC_OscInitStruct.PLL.PLLR       = 2;
+    RCC_OscInitStruct.PLL.PLLRGE     = RCC_PLL1VCIRANGE_2;
+    RCC_OscInitStruct.PLL.PLLVCOSEL  = RCC_PLL1VCOWIDE;
+    RCC_OscInitStruct.PLL.PLLFRACN   = 0;
     if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
     {
         Error_Handler();
@@ -208,9 +223,9 @@ void SystemClock_Config(void)
     RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
                                   | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2
                                   | RCC_CLOCKTYPE_D3PCLK1 | RCC_CLOCKTYPE_D1PCLK1;
-    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-    RCC_ClkInitStruct.SYSCLKDivider = RCC_SYSCLK_DIV1;
-    RCC_ClkInitStruct.AHBCLKDivider = RCC_HCLK_DIV2;
+    RCC_ClkInitStruct.SYSCLKSource   = RCC_SYSCLKSOURCE_PLLCLK;
+    RCC_ClkInitStruct.SYSCLKDivider  = RCC_SYSCLK_DIV1;
+    RCC_ClkInitStruct.AHBCLKDivider  = RCC_HCLK_DIV2;
     RCC_ClkInitStruct.APB3CLKDivider = RCC_APB3_DIV2;
     RCC_ClkInitStruct.APB1CLKDivider = RCC_APB1_DIV2;
     RCC_ClkInitStruct.APB2CLKDivider = RCC_APB2_DIV2;
@@ -220,6 +235,9 @@ void SystemClock_Config(void)
     {
         Error_Handler();
     }
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk; // 使能 DWT
+    DWT->CYCCNT = 0;                                // 清零
+    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;            // 使能计数器
 }
 
 /* USER CODE BEGIN 4 */
@@ -238,19 +256,30 @@ int __io_putchar(int ch)
 __weak void WiFiTask(void *argument)
 {
     /* Infinite loop */
-    for(;;)
+    for (;;)
     {
         osDelay(1);
     }
 }
+
 __weak void DebugTask(void *argument)
 {
     /* Infinite loop */
-    for(;;)
+    for (;;)
     {
         osDelay(1);
     }
 }
+
+__weak void GuiTask(void *argument)
+{
+    /* Infinite loop */
+    for (;;)
+    {
+        osDelay(1);
+    }
+}
+
 /* USER CODE END 4 */
 
 /* MPU Configuration */
@@ -264,75 +293,75 @@ void MPU_Config(void)
 
     /** Initializes and configures the Region and the memory to be protected
     */
-    MPU_InitStruct.Enable = MPU_REGION_ENABLE;
-    MPU_InitStruct.Number = MPU_REGION_NUMBER0;
-    MPU_InitStruct.BaseAddress = 0x90000000;
-    MPU_InitStruct.Size = MPU_REGION_SIZE_8MB;
+    MPU_InitStruct.Enable           = MPU_REGION_ENABLE;
+    MPU_InitStruct.Number           = MPU_REGION_NUMBER0;
+    MPU_InitStruct.BaseAddress      = 0x90000000;
+    MPU_InitStruct.Size             = MPU_REGION_SIZE_8MB;
     MPU_InitStruct.SubRegionDisable = 0x0;
-    MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL1;
+    MPU_InitStruct.TypeExtField     = MPU_TEX_LEVEL1;
     MPU_InitStruct.AccessPermission = MPU_REGION_FULL_ACCESS;
-    MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_ENABLE;
-    MPU_InitStruct.IsShareable = MPU_ACCESS_NOT_SHAREABLE;
-    MPU_InitStruct.IsCacheable = MPU_ACCESS_CACHEABLE;
-    MPU_InitStruct.IsBufferable = MPU_ACCESS_BUFFERABLE;
+    MPU_InitStruct.DisableExec      = MPU_INSTRUCTION_ACCESS_ENABLE;
+    MPU_InitStruct.IsShareable      = MPU_ACCESS_NOT_SHAREABLE;
+    MPU_InitStruct.IsCacheable      = MPU_ACCESS_CACHEABLE;
+    MPU_InitStruct.IsBufferable     = MPU_ACCESS_BUFFERABLE;
 
     HAL_MPU_ConfigRegion(&MPU_InitStruct);
 
     /** Initializes and configures the Region and the memory to be protected
     */
-    MPU_InitStruct.Enable = MPU_REGION_ENABLE;
-    MPU_InitStruct.Number = MPU_REGION_NUMBER1;
-    MPU_InitStruct.BaseAddress = 0x24000000;
-    MPU_InitStruct.Size = MPU_REGION_SIZE_512KB;
+    MPU_InitStruct.Enable           = MPU_REGION_ENABLE;
+    MPU_InitStruct.Number           = MPU_REGION_NUMBER1;
+    MPU_InitStruct.BaseAddress      = 0x24000000;
+    MPU_InitStruct.Size             = MPU_REGION_SIZE_512KB;
     MPU_InitStruct.SubRegionDisable = 0x0;
-    MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL1;
+    MPU_InitStruct.TypeExtField     = MPU_TEX_LEVEL1;
     MPU_InitStruct.AccessPermission = MPU_REGION_FULL_ACCESS;
-    MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_ENABLE;
-    MPU_InitStruct.IsBufferable = MPU_ACCESS_BUFFERABLE;
-    MPU_InitStruct.IsCacheable = MPU_ACCESS_CACHEABLE;
-    MPU_InitStruct.IsShareable = MPU_ACCESS_NOT_SHAREABLE;
+    MPU_InitStruct.DisableExec      = MPU_INSTRUCTION_ACCESS_ENABLE;
+    MPU_InitStruct.IsBufferable     = MPU_ACCESS_BUFFERABLE;
+    MPU_InitStruct.IsCacheable      = MPU_ACCESS_CACHEABLE;
+    MPU_InitStruct.IsShareable      = MPU_ACCESS_NOT_SHAREABLE;
 
     HAL_MPU_ConfigRegion(&MPU_InitStruct);
 
-    MPU_InitStruct.Enable = MPU_REGION_ENABLE;
-    MPU_InitStruct.Number = MPU_REGION_NUMBER2;
-    MPU_InitStruct.BaseAddress = 0x30000000;
-    MPU_InitStruct.Size = MPU_REGION_SIZE_512KB;
+    MPU_InitStruct.Enable           = MPU_REGION_ENABLE;
+    MPU_InitStruct.Number           = MPU_REGION_NUMBER2;
+    MPU_InitStruct.BaseAddress      = 0x30000000;
+    MPU_InitStruct.Size             = MPU_REGION_SIZE_512KB;
     MPU_InitStruct.SubRegionDisable = 0x0;
-    MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL1;
+    MPU_InitStruct.TypeExtField     = MPU_TEX_LEVEL1;
     MPU_InitStruct.AccessPermission = MPU_REGION_FULL_ACCESS;
-    MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_ENABLE;
-    MPU_InitStruct.IsBufferable = MPU_ACCESS_BUFFERABLE;
-    MPU_InitStruct.IsCacheable = MPU_ACCESS_CACHEABLE;
-    MPU_InitStruct.IsShareable = MPU_ACCESS_NOT_SHAREABLE;
+    MPU_InitStruct.DisableExec      = MPU_INSTRUCTION_ACCESS_ENABLE;
+    MPU_InitStruct.IsBufferable     = MPU_ACCESS_BUFFERABLE;
+    MPU_InitStruct.IsCacheable      = MPU_ACCESS_CACHEABLE;
+    MPU_InitStruct.IsShareable      = MPU_ACCESS_NOT_SHAREABLE;
 
     HAL_MPU_ConfigRegion(&MPU_InitStruct);
 
-    MPU_InitStruct.Enable = MPU_REGION_ENABLE;
-    MPU_InitStruct.Number = MPU_REGION_NUMBER3;
-    MPU_InitStruct.BaseAddress = 0x38000000;
-    MPU_InitStruct.Size = MPU_REGION_SIZE_64KB;
+    MPU_InitStruct.Enable           = MPU_REGION_ENABLE;
+    MPU_InitStruct.Number           = MPU_REGION_NUMBER3;
+    MPU_InitStruct.BaseAddress      = 0x38000000;
+    MPU_InitStruct.Size             = MPU_REGION_SIZE_64KB;
     MPU_InitStruct.SubRegionDisable = 0x0;
-    MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL1;
+    MPU_InitStruct.TypeExtField     = MPU_TEX_LEVEL1;
     MPU_InitStruct.AccessPermission = MPU_REGION_FULL_ACCESS;
-    MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_ENABLE;
-    MPU_InitStruct.IsBufferable = MPU_ACCESS_BUFFERABLE;
-    MPU_InitStruct.IsCacheable = MPU_ACCESS_CACHEABLE;
-    MPU_InitStruct.IsShareable = MPU_ACCESS_NOT_SHAREABLE;
+    MPU_InitStruct.DisableExec      = MPU_INSTRUCTION_ACCESS_ENABLE;
+    MPU_InitStruct.IsBufferable     = MPU_ACCESS_BUFFERABLE;
+    MPU_InitStruct.IsCacheable      = MPU_ACCESS_CACHEABLE;
+    MPU_InitStruct.IsShareable      = MPU_ACCESS_NOT_SHAREABLE;
 
     HAL_MPU_ConfigRegion(&MPU_InitStruct);
 
-    MPU_InitStruct.Enable = MPU_REGION_ENABLE;
-    MPU_InitStruct.Number = MPU_REGION_NUMBER4;
-    MPU_InitStruct.BaseAddress = 0xC0000000;
-    MPU_InitStruct.Size = MPU_REGION_SIZE_32MB;
+    MPU_InitStruct.Enable           = MPU_REGION_ENABLE;
+    MPU_InitStruct.Number           = MPU_REGION_NUMBER4;
+    MPU_InitStruct.BaseAddress      = 0xC0000000;
+    MPU_InitStruct.Size             = MPU_REGION_SIZE_32MB;
     MPU_InitStruct.SubRegionDisable = 0x0;
-    MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL0;
+    MPU_InitStruct.TypeExtField     = MPU_TEX_LEVEL0;
     MPU_InitStruct.AccessPermission = MPU_REGION_FULL_ACCESS;
-    MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_ENABLE;
-    MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;
-    MPU_InitStruct.IsCacheable = MPU_ACCESS_CACHEABLE;
-    MPU_InitStruct.IsShareable = MPU_ACCESS_NOT_SHAREABLE;
+    MPU_InitStruct.DisableExec      = MPU_INSTRUCTION_ACCESS_ENABLE;
+    MPU_InitStruct.IsBufferable     = MPU_ACCESS_NOT_BUFFERABLE;
+    MPU_InitStruct.IsCacheable      = MPU_ACCESS_CACHEABLE;
+    MPU_InitStruct.IsShareable      = MPU_ACCESS_NOT_SHAREABLE;
 
     HAL_MPU_ConfigRegion(&MPU_InitStruct);
     /* Enables the MPU */
